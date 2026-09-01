@@ -19,6 +19,15 @@ export const ImageCapture: React.FC<Props> = ({ onDeactivate }) => {
   const webcamRef = useRef<Webcam>(null)
   const windowSize = useWindowSize()
 
+  // Release the camera on unmount
+  useEffect(() => {
+    const cam = webcamRef.current
+    const stream = cam?.video?.srcObject as MediaStream | null
+    return () => {
+      stream?.getTracks().forEach((t) => t.stop())
+    }
+  }, [])
+
   // Lock scroll/zoom while capturing
   useEffect(() => {
     const root = document.documentElement
@@ -59,10 +68,9 @@ export const ImageCapture: React.FC<Props> = ({ onDeactivate }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-10 bg-black">
+    <div className="fixed inset-0 z-10 bg-primary">
       <Webcam
         audio={false}
-        className="absolute left-0 top-16 z-20"
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         height={windowSize.height}
@@ -70,6 +78,7 @@ export const ImageCapture: React.FC<Props> = ({ onDeactivate }) => {
         videoConstraints={cameraVideoConstraints}
         forceScreenshotSourceSize={true}
         onUserMediaError={console.error}
+        className="absolute left-0 top-16 z-20"
       />
       <Button
         className="rounded-full aspect-square size-16 z-30 absolute bottom-4 left-1/2 -translate-x-1/2 text-black bg-white"
@@ -79,7 +88,7 @@ export const ImageCapture: React.FC<Props> = ({ onDeactivate }) => {
       </Button>
       <Button
         variant="ghost"
-        className="absolute top-2 left-2 z-40 size-12 rounded-full bg-black/50 text-white"
+        className="absolute top-2 left-2 z-30 size-12 rounded-full bg-black/50 text-white"
         onClick={() => onDeactivate()}
       >
         <FaXmark className="size-6" />

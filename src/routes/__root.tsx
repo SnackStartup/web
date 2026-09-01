@@ -1,7 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import Footer from '../components/Footer'
+import { Footer } from '#/components/Footer'
 import { Analytics } from '@vercel/analytics/react'
 
 import '../styles.css'
@@ -32,7 +32,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] h-screen">
         {children}
-        <Footer />
+        <Footer className="mt-16" />
         <Analytics />
         <TanStackDevtools
           config={{
