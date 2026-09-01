@@ -56,13 +56,13 @@ function RouteComponent() {
     <Page className="flex flex-col gap-6 h-full">
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row gap-2 items-center">
-          <img src="/assets/icon-2.png" className="size-10" />
+          <img src="/icon-2.png" className="size-10" />
           <h1 className="font-bold text-xl text-primary">Kadr</h1>
         </div>
         <div className="flex flex-row gap-2 items-center">
           <h1 className="font-bold text-md">Cat cafe</h1>
           <img
-            src="/assets/coffee.jpg"
+            src="/coffee.jpg"
             className="size-12 rounded-full aspect-square object-cover"
           />
         </div>
