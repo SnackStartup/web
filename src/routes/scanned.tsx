@@ -69,7 +69,6 @@ function RouteComponent() {
           </p>
         </div>
       </div>
-
       <div>
         <h2 className="font-semibold">Zrób zdjęcie swojego dania</h2>
         <p>
