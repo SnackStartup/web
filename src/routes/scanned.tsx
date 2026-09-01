@@ -3,6 +3,7 @@ import { Button } from '#/components/ui/button'
 import { Skeleton } from '#/components/ui/skeleton'
 import { createFileRoute } from '@tanstack/react-router'
 import {
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -14,22 +15,34 @@ import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Field } from '#/components/ui/field'
 import { Checkbox } from '#/components/ui/checkbox'
 import { Label } from '#/components/ui/label'
+import { useWindowSize } from '#/hooks/use-window-size'
 
 export const Route = createFileRoute('/scanned')({
   component: RouteComponent,
 })
-
-const cameraVideoConstraints: MediaTrackConstraints = {
-  facingMode: {
-    exact: 'environment',
-  },
-}
 
 function RouteComponent() {
   const [isCapturingImage, setIsCapturingImage] = useState<boolean>(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const webcamRef = useRef<Webcam>(null)
   const inputFileRef = useRef<HTMLInputElement>(null)
+  const windowSize = useWindowSize()
+
+  const cameraVideoConstraints = useMemo<MediaTrackConstraints>(
+    () => ({
+      facingMode: {
+        exact: import.meta.env.DEV ? 'user' : 'environment',
+      },
+      aspectRatio: windowSize.height / windowSize.width,
+    }),
+    [windowSize],
+  )
+
+  /*
+   *
+   * Handlers
+   *
+   */
 
   const handleCaptureImageButtonClicked = () => {
     setIsCapturingImage(true)
@@ -58,6 +71,12 @@ function RouteComponent() {
       setSelectedFiles((files) => [...files, file])
     }
   }
+
+  /*
+   *
+   *
+   *
+   */
 
   return (
     <Page className="flex flex-col gap-6 relative">
@@ -131,10 +150,13 @@ function RouteComponent() {
         <>
           <Webcam
             audio={false}
-            className="absolute left-0 top-0 z-10 w-[100vw] h-[100vh]"
+            className="absolute left-0 top-0 z-10"
             ref={webcamRef}
             screenshotFormat="image/jpeg"
+            height={windowSize.height}
+            width={windowSize.width}
             videoConstraints={cameraVideoConstraints}
+            forceScreenshotSourceSize={true}
           />
           <Button
             className="rounded-full aspect-square size-16 z-20 absolute bottom-4 left-1/2 -translate-x-1/2"
