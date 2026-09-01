@@ -79,7 +79,7 @@ function RouteComponent() {
    */
 
   return (
-    <Page className="flex flex-col gap-6">
+    <Page className="flex flex-col gap-6 h-full">
       <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2 items-center">
           <Skeleton className="size-18 rounded-full aspect-square" />
@@ -105,7 +105,7 @@ function RouteComponent() {
         </p>
       </div>
       <Button
-        className="h-30 text-xl w-full"
+        className="h-20 text-xl w-full"
         onClick={handleCaptureImageButtonClicked}
       >
         <FaCamera className="size-9 mx-2" />
@@ -128,7 +128,7 @@ function RouteComponent() {
           />
           <Button
             variant="outline"
-            className="h-30 text-xl w-full"
+            className="h-20 text-xl w-full"
             onClick={handleSelectImageButtonClicked}
           >
             <FaImage className="size-9 mx-2" />
@@ -136,6 +136,7 @@ function RouteComponent() {
           </Button>
         </>
       )}
+      <div className="flex-1" />
       <Field orientation="horizontal">
         <Checkbox id="terms-checkbox" name="terms-checkbox" defaultChecked />
         <Label htmlFor="terms-checkbox">
@@ -150,20 +151,21 @@ function RouteComponent() {
         <>
           <Webcam
             audio={false}
-            className="absolute left-0 top-0 z-10 translate-y-1/2"
+            className="absolute left-0 top-0 z-20 translate-y-1/2"
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             height={windowSize.height}
             width={windowSize.width}
             videoConstraints={cameraVideoConstraints}
-            // forceScreenshotSourceSize={true}
+            forceScreenshotSourceSize={true}
           />
           <Button
-            className="rounded-full aspect-square size-16 z-20 absolute bottom-4 left-1/2 -translate-x-1/2"
+            className="rounded-full aspect-square size-16 z-30 absolute bottom-4 left-1/2 -translate-x-1/2 text-black bg-white"
             onClick={handleConfirmCaptureImageButtonClicked}
           >
             <FaCamera className="size-7" />
           </Button>
+          <div className="absolute left-0 top-0 h-screen w-screen bg-black z-10" />
         </>
       )}
     </Page>
