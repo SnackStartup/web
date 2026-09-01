@@ -29,13 +29,13 @@ function RouteComponent() {
       </div>
       <br />
       <br />
-      <Button className="h-30 text-2xl w-full">
+      <Button className="h-30 text-xl w-full">
         <FaCamera className="size-9 mx-2" />
         Zrób zdjęcie
       </Button>
       <br />
       <br />
-      <Button variant="secondary" className="h-30 text-2xl w-full">
+      <Button variant="secondary" className="h-30 text-xl w-full">
         <FaImage className="size-9 mx-2" />
         Wybierz z galerii
       </Button>
