@@ -19,23 +19,32 @@ export const Route = createFileRoute('/scanned')({
   component: RouteComponent,
 })
 
-// const videoConstraints = {
-//   width: 1280,
-//   height: 720,
-//   facingMode: 'user',
-// }
+const cameraVideoConstraints: MediaTrackConstraints = {
+  facingMode: {
+    exact: 'environment',
+  },
+}
 
 function RouteComponent() {
   const [isCapturingImage, setIsCapturingImage] = useState<boolean>(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const webcamRef = useRef(null)
+  const webcamRef = useRef<Webcam>(null)
   const inputFileRef = useRef<HTMLInputElement>(null)
 
   const handleCaptureImageButtonClicked = () => {
     setIsCapturingImage(true)
   }
 
-  const handleConfirmCaptureImageButtonClicked = () => {
+  const handleConfirmCaptureImageButtonClicked = async () => {
+    if (webcamRef.current) {
+      const base64 = webcamRef.current.getScreenshot()
+      if (typeof base64 === 'string') {
+        const data = await fetch(base64)
+        const blob = await data.blob()
+        const file = await new File([blob], 'avatar', { type: 'image/png' })
+        setSelectedFiles((files) => [...files, file])
+      }
+    }
     setIsCapturingImage(false)
   }
 
@@ -51,7 +60,7 @@ function RouteComponent() {
   }
 
   return (
-    <Page className="flex flex-col gap-6">
+    <Page className="flex flex-col gap-6 relative">
       <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2 items-center">
           <Skeleton className="size-18 rounded-full aspect-square" />
@@ -115,16 +124,17 @@ function RouteComponent() {
           mediach społecznościowych
         </Label>
       </Field>
+      <Button disabled={selectedFiles.length === 0} size="lg">
+        Wyślij
+      </Button>
       {isCapturingImage && (
         <>
           <Webcam
             audio={false}
-            className="absolute left-0 top-0 z-10"
+            className="absolute left-0 top-0 z-10 w-[100vw] h-[100vh]"
             ref={webcamRef}
             screenshotFormat="image/jpeg"
-            height="100%"
-            width="100%"
-            // videoConstraints={videoConstraints}
+            videoConstraints={cameraVideoConstraints}
           />
           <Button
             className="rounded-full aspect-square size-16 z-20 absolute bottom-4 left-1/2 -translate-x-1/2"

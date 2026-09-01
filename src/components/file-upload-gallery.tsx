@@ -41,7 +41,7 @@ export const FileUploadGallery: React.FC<Props> = ({
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-1 right-1 size-6 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute top-1 right-1 size-6 transition-opacity opacity-100"
                 onClick={() => handleRemove(index)}
               >
                 <X className="size-3" />
