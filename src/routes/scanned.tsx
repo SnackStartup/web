@@ -73,7 +73,7 @@ function RouteComponent() {
     <Page className="flex flex-col gap-6 h-full">
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row gap-2 items-center">
-          <img src="/icon-2.png" className="size-10" />
+          <img src="/icon.png" className="size-10" />
           <h1 className="font-bold text-xl text-primary">Stolik</h1>
         </div>
         <div className="flex flex-row gap-2 items-center">
