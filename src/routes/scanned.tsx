@@ -7,7 +7,6 @@ import { FaLocationDot, FaCamera, FaImage } from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
 import { HeartIcon } from 'lucide-react'
-import { ImageCapture } from '#/components/image-capture'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 
 export const Route = createFileRoute('/scanned')({
@@ -15,11 +14,11 @@ export const Route = createFileRoute('/scanned')({
 })
 
 function RouteComponent() {
-  const [isCapturingImage, setIsCapturingImage] = useState<boolean>(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const inputFileRef = useRef<HTMLInputElement>(null)
   const apiUploadPhotosMutation = useApiUploadPhotosMutation()
   const navigate = useNavigate()
+  const imageCaptureInputRef = useRef<HTMLInputElement>(null)
 
   /*
    *
@@ -27,15 +26,8 @@ function RouteComponent() {
    *
    */
 
-  const handleImageCaptureDeactivated = (file?: File) => {
-    if (file) {
-      setSelectedFiles((files) => [...files, file])
-    }
-    setIsCapturingImage(false)
-  }
-
   const handleCaptureImageButtonClicked = () => {
-    setIsCapturingImage(true)
+    imageCaptureInputRef.current?.click()
   }
 
   const handleSelectImageButtonClicked = () => {
@@ -85,9 +77,6 @@ function RouteComponent() {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        {/* <p className="text-neutral-500">
-          Cat cafe description lorem ipsum lorem ipsum lorem ipsum
-        </p> */}
         <div className="flex flex-row gap-2">
           <FaLocationDot className="size-5" />
           <p className="text-nowrap text-ellipsis overflow-hidden">
@@ -108,6 +97,14 @@ function RouteComponent() {
           u nas, a Ty dostaniesz lepsze zdjęcie na swój telefon.
         </p>
       </div>
+      <input
+        ref={imageCaptureInputRef}
+        type="file"
+        accept="image/*"
+        capture="user"
+        hidden
+        onChange={handleFileChange}
+      />
       <Button
         className="h-20 text-xl w-full"
         onClick={handleCaptureImageButtonClicked}
@@ -153,9 +150,6 @@ function RouteComponent() {
         Klikając przycisk „Wyślij", wyrażasz zgodę na wykorzystanie tego zdjęcia
         przez restaurację w jej mediach społecznościowych.
       </p>
-      {isCapturingImage && (
-        <ImageCapture onDeactivate={handleImageCaptureDeactivated} />
-      )}
     </Page>
   )
 }
