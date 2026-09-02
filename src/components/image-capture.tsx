@@ -10,8 +10,13 @@ type Props = {
 
 const cameraVideoConstraints: MediaTrackConstraints = {
   facingMode: {
-    // ideal: import.meta.env.DEV ? 'user' : 'environment',
     ideal: 'environment',
+  },
+  width: {
+    ideal: 3840,
+  },
+  height: {
+    ideal: 2160,
   },
 }
 
