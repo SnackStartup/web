@@ -6,10 +6,24 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
+import { existsSync, readFileSync } from 'node:fs'
 
-const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact(), nitro()],
+export default defineConfig(({ command }) => {
+  const keyPath = 'certs/dev-key.pem'
+  const certPath = 'certs/dev-cert.pem'
+  const useHttps =
+    command === 'serve' && existsSync(keyPath) && existsSync(certPath)
+
+  return {
+    resolve: { tsconfigPaths: true },
+    plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact(), nitro()],
+    server: useHttps
+      ? {
+          https: {
+            key: readFileSync(keyPath),
+            cert: readFileSync(certPath),
+          },
+        }
+      : undefined,
+  }
 })
-
-export default config

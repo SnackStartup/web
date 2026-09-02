@@ -1,7 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import Footer from '../components/Footer'
+import { Footer } from '#/components/Footer'
 import { Analytics } from '@vercel/analytics/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
@@ -36,7 +36,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="font-sans antialiased [overflow-wrap:anywhere] h-screen">
         <QueryClientProvider client={queryClient}>
           {children}
-          <Footer />
+          <Footer className="mt-16" />
           <Analytics />
           <TanStackDevtools
             config={{
