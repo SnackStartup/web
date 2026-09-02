@@ -16,8 +16,8 @@ export const Footer: React.FC<Props> = ({ className }) => {
       )}
     >
       <div className="flex items-center gap-2">
-        <img src="/icon-2.png" className="size-6" alt="Kadr logo" />
-        <span className="font-bold text-primary">Kadr</span>
+        <img src="/icon-2.png" className="size-6" alt="logo" />
+        <span className="font-bold text-primary">Stolik</span>
       </div>
       <p className="max-w-sm text-xs text-neutral-500">
         Jesteśmy aplikacją, która pomaga restauracjom i gościom dzielić się
@@ -34,15 +34,15 @@ export const Footer: React.FC<Props> = ({ className }) => {
           +48 123 456 789
         </a>
         <a
-          href="mailto:kontakt@kadr.app"
+          href="mailto:kontakt@stolik.app"
           className="flex items-center gap-1.5 transition-colors hover:text-primary"
         >
           <FaEnvelope className="size-3" />
-          kontakt@kadr.app
+          kontakt@stolik.app
         </a>
       </div>
 
-      <p className="text-xs text-neutral-400">© {year} Kadr</p>
+      <p className="text-xs text-neutral-400">© {year} Stolik</p>
     </footer>
   )
 }

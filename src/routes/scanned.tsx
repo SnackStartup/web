@@ -1,6 +1,6 @@
 import { Page } from '#/components/Page'
 import { Button } from '#/components/ui/button'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import type { ChangeEventHandler } from 'react'
 import { FaLocationDot, FaCamera, FaImage } from 'react-icons/fa6'
@@ -19,6 +19,7 @@ function RouteComponent() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const inputFileRef = useRef<HTMLInputElement>(null)
   const apiUploadPhotosMutation = useApiUploadPhotosMutation()
+  const navigate = useNavigate()
 
   /*
    *
@@ -49,7 +50,17 @@ function RouteComponent() {
   }
 
   const handleUploadButtonClicked = () => {
-    apiUploadPhotosMutation.mutate({ files: selectedFiles })
+    apiUploadPhotosMutation.mutate(
+      { files: selectedFiles },
+      {
+        onSuccess() {
+          navigate({ to: '/thanks' })
+        },
+        onError() {
+          navigate({ to: '/scanned' })
+        },
+      },
+    )
   }
 
   /*
@@ -63,7 +74,7 @@ function RouteComponent() {
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row gap-2 items-center">
           <img src="/icon-2.png" className="size-10" />
-          <h1 className="font-bold text-xl text-primary">Kadr</h1>
+          <h1 className="font-bold text-xl text-primary">Stolik</h1>
         </div>
         <div className="flex flex-row gap-2 items-center">
           <h1 className="font-bold text-md">Cat cafe</h1>
