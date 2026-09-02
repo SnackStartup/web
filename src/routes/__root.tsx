@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import Footer from '../components/Footer'
 import { Analytics } from '@vercel/analytics/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import '../styles.css'
 
@@ -24,6 +25,8 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+const queryClient = new QueryClient()
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -31,21 +34,23 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] h-screen">
-        {children}
-        <Footer />
-        <Analytics />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-        <Scripts />
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <Footer />
+          <Analytics />
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+          <Scripts />
+        </QueryClientProvider>
       </body>
     </html>
   )

@@ -16,6 +16,7 @@ import { Field } from '#/components/ui/field'
 import { Checkbox } from '#/components/ui/checkbox'
 import { Label } from '#/components/ui/label'
 import { useWindowSize } from '#/hooks/use-window-size'
+import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 
 export const Route = createFileRoute('/scanned')({
   component: RouteComponent,
@@ -27,6 +28,7 @@ function RouteComponent() {
   const webcamRef = useRef<Webcam>(null)
   const inputFileRef = useRef<HTMLInputElement>(null)
   const windowSize = useWindowSize()
+  const apiUploadPhotosMutation = useApiUploadPhotosMutation()
 
   const cameraVideoConstraints = useMemo<MediaTrackConstraints>(
     () => ({
@@ -70,6 +72,10 @@ function RouteComponent() {
     if (file) {
       setSelectedFiles((files) => [...files, file])
     }
+  }
+
+  const handleUploadButtonClicked = () => {
+    apiUploadPhotosMutation.mutate({ files: selectedFiles })
   }
 
   /*
@@ -144,7 +150,11 @@ function RouteComponent() {
           mediach społecznościowych
         </Label>
       </Field>
-      <Button disabled={selectedFiles.length === 0} size="lg">
+      <Button
+        disabled={selectedFiles.length === 0}
+        size="lg"
+        onClick={handleUploadButtonClicked}
+      >
         Wyślij
       </Button>
       {isCapturingImage && (
