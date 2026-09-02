@@ -10,7 +10,7 @@ import { HeartIcon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
 
-export const Route = createFileRoute('/scanned')({
+export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
 })
 
@@ -21,14 +21,6 @@ function RouteComponent() {
   const navigate = useNavigate()
   const imageCaptureInputRef = useRef<HTMLInputElement>(null)
   const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
-
-  useEffect(() => {
-    console.log('MOUNT')
-
-    return () => {
-      console.log('UNMOUNT')
-    }
-  }, [])
 
   /*
    *
@@ -62,7 +54,7 @@ function RouteComponent() {
         },
         onError(error) {
           console.error(error)
-          navigate({ to: '/scanned' })
+          navigate({ to: '/scanned/$id', params: { id: '1' } })
         },
       },
     )

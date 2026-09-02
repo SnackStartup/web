@@ -10,43 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ScannedRouteImport } from './routes/scanned'
+import { Route as ScannedIdRouteImport } from './routes/scanned.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ScannedRoute = ScannedRouteImport.update({
-  id: '/scanned',
-  path: '/scanned',
+const ScannedIdRoute = ScannedIdRouteImport.update({
+  id: '/scanned/$id',
+  path: '/scanned/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/scanned': typeof ScannedRoute
+  '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/scanned': typeof ScannedRoute
+  '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/scanned': typeof ScannedRoute
+  '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/scanned'
+  fullPaths: '/' | '/scanned/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/scanned'
-  id: '__root__' | '/' | '/scanned'
+  to: '/' | '/scanned/$id'
+  id: '__root__' | '/' | '/scanned/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ScannedRoute: typeof ScannedRoute
+  ScannedIdRoute: typeof ScannedIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,11 +58,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/scanned': {
-      id: '/scanned'
-      path: '/scanned'
-      fullPath: '/scanned'
-      preLoaderRoute: typeof ScannedRouteImport
+    '/scanned/$id': {
+      id: '/scanned/$id'
+      path: '/scanned/$id'
+      fullPath: '/scanned/$id'
+      preLoaderRoute: typeof ScannedIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -70,7 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ScannedRoute: ScannedRoute,
+  ScannedIdRoute: ScannedIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -7,7 +7,7 @@ export const NotFoundComponent: React.FC = () => {
   const navigate = useNavigate()
 
   const handleBackButtonClicked = () => {
-    navigate({ to: '/scanned' })
+    navigate({ to: '/scanned/$id', params: { id: '1' } })
   }
 
   return (
