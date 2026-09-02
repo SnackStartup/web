@@ -1,0 +1,13 @@
+@keyframes countdown {
+  from {
+    width: 100vw;
+  }
+
+  to {
+    width: 0vw;
+  }
+}
+
+.animate-countdown {
+  animation: countdown 5s linear forwards;
+}

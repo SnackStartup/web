@@ -1,13 +1,14 @@
 import { Page } from '#/components/Page'
 import { Button } from '#/components/ui/button'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEventHandler } from 'react'
 import { FaLocationDot, FaCamera, FaImage } from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
-import { HeartIcon } from 'lucide-react'
+import { HeartIcon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
+import { ThanksScreen } from '#/components/ThanksScreen'
 
 export const Route = createFileRoute('/scanned')({
   component: RouteComponent,
@@ -19,6 +20,15 @@ function RouteComponent() {
   const apiUploadPhotosMutation = useApiUploadPhotosMutation()
   const navigate = useNavigate()
   const imageCaptureInputRef = useRef<HTMLInputElement>(null)
+  const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
+
+  useEffect(() => {
+    console.log('MOUNT')
+
+    return () => {
+      console.log('UNMOUNT')
+    }
+  }, [])
 
   /*
    *
@@ -39,6 +49,7 @@ function RouteComponent() {
     if (file) {
       setSelectedFiles((files) => [...files, file])
     }
+    event.target.value = ''
   }
 
   const handleUploadButtonClicked = () => {
@@ -46,9 +57,11 @@ function RouteComponent() {
       { files: selectedFiles },
       {
         onSuccess() {
-          navigate({ to: '/thanks' })
+          setSelectedFiles([])
+          setShowThanksScreen(true)
         },
-        onError() {
+        onError(error) {
+          console.error(error)
           navigate({ to: '/scanned' })
         },
       },
@@ -83,10 +96,10 @@ function RouteComponent() {
             Michała Kleofasa Ogińskiego 4, Bydgoszcz
           </p>
         </div>
-        <Rating defaultValue={4} className="gap-1 text-pink-500">
+        <Rating defaultValue={4} className="gap-1 text-amber-500">
           {Array.from({ length: 5 }, (_, i) => (
             <RatingItem key={i} className="pointer-events-none">
-              <HeartIcon />
+              <StarIcon />
             </RatingItem>
           ))}
         </Rating>
@@ -101,7 +114,7 @@ function RouteComponent() {
         ref={imageCaptureInputRef}
         type="file"
         accept="image/*"
-        capture="user"
+        capture="environment"
         hidden
         onChange={handleFileChange}
       />
@@ -150,6 +163,10 @@ function RouteComponent() {
         Klikając przycisk „Wyślij", wyrażasz zgodę na wykorzystanie tego zdjęcia
         przez restaurację w jej mediach społecznościowych.
       </p>
+      <ThanksScreen
+        visible={showThanksScreen}
+        onVisibleChange={setShowThanksScreen}
+      />
     </Page>
   )
 }

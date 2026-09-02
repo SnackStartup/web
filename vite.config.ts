@@ -16,7 +16,17 @@ export default defineConfig(({ command }) => {
 
   return {
     resolve: { tsconfigPaths: true },
-    plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact(), nitro()],
+    plugins: [
+      devtools(),
+      tailwindcss(),
+      tanstackStart({
+        spa: {
+          enabled: true,
+        },
+      }),
+      viteReact(),
+      nitro(),
+    ],
     server: useHttps
       ? {
           https: {
