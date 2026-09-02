@@ -16,7 +16,7 @@ export const Footer: React.FC<Props> = ({ className }) => {
       )}
     >
       <div className="flex items-center gap-2">
-        <img src="/icon-2.png" className="size-6" alt="logo" />
+        <img src="/icon.png" className="size-6" alt="logo" />
         <span className="font-bold text-primary">Stolik</span>
       </div>
       <p className="max-w-sm text-xs text-neutral-500">
