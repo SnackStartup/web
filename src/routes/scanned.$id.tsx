@@ -114,23 +114,23 @@ function RouteComponent() {
     <Page className="flex flex-col gap-6 h-full">
       <div className="flex flex-col gap-2">
         <div className="flex flex-row items-center justify-between">
-          <div
-            className="flex flex-row gap-1 items-center"
-            onClick={() => navigate({ to: '/' })}
-          >
-            <img src="/icon.png" className="size-10" />
-            <h1 className="font-bold text-xl text-primary">Stolik</h1>
-          </div>
           <div className="flex flex-row gap-2 items-center">
-            <h1 className="text-xs text-right">
-              Klubokawiarnia
-              <br />
-              „Pod Kocim Ogonem"
-            </h1>
             <img
               src="/coffee.jpg"
               className="size-12 rounded-full aspect-square object-cover"
             />
+            <h1 className="text-xs text-left">
+              Klubokawiarnia
+              <br />
+              „Pod Kocim Ogonem"
+            </h1>
+          </div>
+          <div
+            className="flex flex-row gap-1 items-center"
+            onClick={() => navigate({ to: '/' })}
+          >
+            <h1 className="font-bold text-xl text-primary">Stolik</h1>
+            <img src="/icon.png" className="size-10" />
           </div>
         </div>
         <div className="flex flex-row gap-2">
