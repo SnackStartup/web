@@ -10,6 +10,7 @@ import { HeartIcon, Share2Icon, ShareIcon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
 import { CarouselGallery } from '#/components/carousel-gallery'
+import { usePostHog } from '@posthog/react'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -24,6 +25,7 @@ function RouteComponent() {
   const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
   const canSharePics =
     navigator?.canShare && navigator.canShare({ files: selectedFiles })
+  const posthog = usePostHog()
 
   const IMAGES: string[] = [
     '/catcafe/1.jpg',
@@ -72,6 +74,7 @@ function RouteComponent() {
   }
 
   const handleShareButtonClicked = async () => {
+    posthog.capture('shared_page')
     const shareData = {
       title: 'Stolik — Pod Kocim Ogonem',
       text: 'Zobacz zdjęcia dań i podziel się swoim talerzem!',
@@ -86,12 +89,19 @@ function RouteComponent() {
   }
 
   const handleSharePicsButtonClicked = async () => {
+    posthog.capture('shared_pics', {
+      files: selectedFiles.map((file) => file.name),
+    })
     if (canSharePics) {
       await navigator.share({
         title: 'Stolik — Pod Kocim Ogonem',
         files: selectedFiles,
       })
     }
+  }
+
+  const handleRatingClicked = () => {
+    posthog.capture('rating_clicked')
   }
 
   /*
@@ -128,7 +138,11 @@ function RouteComponent() {
           <p>Bydgoszcz, ul. Długa 36</p>
         </div>
         <div className="flex flex-row items-center justify-between">
-          <Rating defaultValue={4} className="gap-1 text-amber-500">
+          <Rating
+            defaultValue={4}
+            className="gap-1 text-amber-500"
+            onClick={handleRatingClicked}
+          >
             {Array.from({ length: 5 }, (_, i) => (
               <RatingItem key={i} className="pointer-events-none">
                 <StarIcon />
