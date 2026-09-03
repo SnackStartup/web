@@ -17,8 +17,21 @@ export const ThanksScreen: React.FC<Props> = ({ visible, onVisibleChange }) => {
     return () => clearTimeout(timeout)
   }, [visible])
 
+  // scroll to top & lock body scroll
+  useEffect(() => {
+    if (!visible) return
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = original
+    }
+  }, [visible])
+
   return (
     <div
+      // kills pinch-to-zoom on mobile
+      style={{ touchAction: 'none' }}
       className={`
           absolute inset-0 bg-white
           flex flex-col items-center justify-center gap-2

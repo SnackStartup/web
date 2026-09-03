@@ -18,9 +18,10 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Snack',
+        title: 'Stolik',
       },
     ],
+    links: [{ rel: 'icon', href: '/icon.png' }],
   }),
   shellComponent: RootDocument,
 })
@@ -33,9 +34,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] h-screen">
+      <body className="font-sans antialiased [overflow-wrap:anywhere] min-h-screen flex flex-col">
         <QueryClientProvider client={queryClient}>
-          {children}
+          <div className="flex-1 flex flex-col">{children}</div>
           <Footer className="mt-16" />
           <Analytics />
           <TanStackDevtools

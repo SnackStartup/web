@@ -7,11 +7,11 @@ export const NotFoundComponent: React.FC = () => {
   const navigate = useNavigate()
 
   const handleBackButtonClicked = () => {
-    navigate({ to: '/scanned/$id', params: { id: '1' } })
+    navigate({ to: '/' })
   }
 
   return (
-    <Page className="flex flex-col items-center justify-center h-full gap-16">
+    <Page className="flex flex-col items-center justify-center h-full gap-16 mt-16">
       <div className="flex flex-col gap-2 items-center">
         <LuCircleAlert className="size-20" />
         <h1 className="text-primary text-3xl font-bold">Strona nie istnieje</h1>

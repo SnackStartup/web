@@ -1,14 +1,15 @@
 import { Page } from '#/components/Page'
 import { Button } from '#/components/ui/button'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEventHandler } from 'react'
 import { FaLocationDot, FaCamera, FaImage } from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
-import { HeartIcon, StarIcon } from 'lucide-react'
+import { HeartIcon, Share2Icon, ShareIcon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
+import { CarouselGallery } from '#/components/carousel-gallery'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -21,6 +22,16 @@ function RouteComponent() {
   const navigate = useNavigate()
   const imageCaptureInputRef = useRef<HTMLInputElement>(null)
   const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
+  const canSharePics =
+    navigator?.canShare && navigator.canShare({ files: selectedFiles })
+
+  const IMAGES: string[] = [
+    '/catcafe/1.jpg',
+    '/catcafe/2.jpg',
+    '/catcafe/3.jpg',
+    '/catcafe/4.jpg',
+    '/catcafe/5.jpg',
+  ]
 
   /*
    *
@@ -37,9 +48,9 @@ function RouteComponent() {
   }
 
   const handleFileChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFiles((files) => [...files, file])
+    const files = Array.from(event.target.files ?? [])
+    if (files.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...files].slice(0, 6))
     }
     event.target.value = ''
   }
@@ -60,6 +71,29 @@ function RouteComponent() {
     )
   }
 
+  const handleShareButtonClicked = async () => {
+    const shareData = {
+      title: 'Stolik — Pod Kocim Ogonem',
+      text: 'Zobacz zdjęcia dań i podziel się swoim talerzem!',
+      url: window.location.href,
+    }
+    try {
+      await window.navigator.share(shareData)
+    } catch (error) {
+      // ignore, user cancelled share
+      console.error(error)
+    }
+  }
+
+  const handleSharePicsButtonClicked = async () => {
+    if (canSharePics) {
+      await navigator.share({
+        title: 'Stolik — Pod Kocim Ogonem',
+        files: selectedFiles,
+      })
+    }
+  }
+
   /*
    *
    *
@@ -68,93 +102,137 @@ function RouteComponent() {
 
   return (
     <Page className="flex flex-col gap-6 h-full">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row gap-2 items-center">
-          <img src="/icon.png" className="size-10" />
-          <h1 className="font-bold text-xl text-primary">Stolik</h1>
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <h1 className="font-bold text-md">Cat cafe</h1>
-          <img
-            src="/coffee.jpg"
-            className="size-12 rounded-full aspect-square object-cover"
-          />
-        </div>
-      </div>
       <div className="flex flex-col gap-2">
+        <div className="flex flex-row items-center justify-between">
+          <div
+            className="flex flex-row gap-1 items-center"
+            onClick={() => navigate({ to: '/' })}
+          >
+            <img src="/icon.png" className="size-10" />
+            <h1 className="font-bold text-xl text-primary">Stolik</h1>
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <h1 className="text-xs text-right">
+              Klubokawiarnia
+              <br />
+              „Pod Kocim Ogonem"
+            </h1>
+            <img
+              src="/coffee.jpg"
+              className="size-12 rounded-full aspect-square object-cover"
+            />
+          </div>
+        </div>
         <div className="flex flex-row gap-2">
           <FaLocationDot className="size-5" />
-          <p className="text-nowrap text-ellipsis overflow-hidden">
-            Michała Kleofasa Ogińskiego 4, Bydgoszcz
-          </p>
+          <p>Bydgoszcz, ul. Długa 36</p>
         </div>
-        <Rating defaultValue={4} className="gap-1 text-amber-500">
-          {Array.from({ length: 5 }, (_, i) => (
-            <RatingItem key={i} className="pointer-events-none">
-              <StarIcon />
-            </RatingItem>
-          ))}
-        </Rating>
+        <div className="flex flex-row items-center justify-between">
+          <Rating defaultValue={4} className="gap-1 text-amber-500">
+            {Array.from({ length: 5 }, (_, i) => (
+              <RatingItem key={i} className="pointer-events-none">
+                <StarIcon />
+              </RatingItem>
+            ))}
+          </Rating>
+          <Button
+            size="sm"
+            className="p-0"
+            variant="ghost"
+            onClick={handleShareButtonClicked}
+          >
+            <Share2Icon className="size-5" />
+          </Button>
+        </div>
       </div>
+      <CarouselGallery images={IMAGES} />
       <div>
-        <p className="text-neutral-400">
-          Zrób zdjęcie swojego dania! Pomożesz nam pokazać, jak wygląda jedzenie
-          u nas, a Ty dostaniesz lepsze zdjęcie na swój telefon.
+        <p className="text-neutral-400 text-sm">
+          Godne relacji? Pokaż nam swój talerz! Dodaj zdjęcie i pomóż innym
+          zobaczyć nasze pyszności, a najładniejsze kadry trafiają na nasze
+          sociale.
         </p>
       </div>
-      <input
-        ref={imageCaptureInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        hidden
-        onChange={handleFileChange}
-      />
-      <Button
-        className="h-20 text-xl w-full"
-        onClick={handleCaptureImageButtonClicked}
-        disabled={selectedFiles.length >= 6}
-      >
-        <FaCamera className="size-9 mx-2" />
-        Zrób zdjęcie
-      </Button>
-      {selectedFiles.length > 0 && (
-        <FileUploadGallery
-          files={selectedFiles}
-          onFilesChange={setSelectedFiles}
+      <div className="flex flex-col gap-2">
+        <input
+          ref={imageCaptureInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          onChange={handleFileChange}
+          multiple
         />
-      )}
-      {selectedFiles.length === 0 && (
-        <>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            ref={inputFileRef}
-            hidden
+        <Button
+          className="h-20 text-xl w-full"
+          onClick={handleCaptureImageButtonClicked}
+          disabled={selectedFiles.length >= 6}
+        >
+          <FaCamera className="size-9 mx-2" />
+          Zrób zdjęcie
+        </Button>
+        {selectedFiles.length > 0 && (
+          <FileUploadGallery
+            files={selectedFiles}
+            onFilesChange={setSelectedFiles}
           />
-          <Button
-            variant="outline"
-            className="h-20 text-xl w-full"
-            onClick={handleSelectImageButtonClicked}
-          >
-            <FaImage className="size-9 mx-2" />
-            Wybierz z galerii
-          </Button>
-        </>
-      )}
-      <div className="flex-1" />
-      <Button
-        disabled={selectedFiles.length === 0}
-        size="lg"
-        onClick={handleUploadButtonClicked}
-      >
-        Wyślij
-      </Button>
+        )}
+        {selectedFiles.length === 0 && (
+          <>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              ref={inputFileRef}
+              hidden
+              multiple
+            />
+            <Button
+              variant="outline"
+              className="h-20 text-xl w-full"
+              onClick={handleSelectImageButtonClicked}
+            >
+              <FaImage className="size-9 mx-2" />
+              Wybierz z galerii
+            </Button>
+          </>
+        )}
+      </div>
       <p className="text-xs text-neutral-400">
-        Klikając przycisk „Wyślij", wyrażasz zgodę na wykorzystanie tego zdjęcia
-        przez restaurację w jej mediach społecznościowych.
+        Klikając przycisk „Wyślij", akceptujesz{' '}
+        <Link
+          to="/polityka-prywatnosci"
+          className="underline hover:text-primary"
+        >
+          Politykę prywatności
+        </Link>{' '}
+        i{' '}
+        <Link to="/regulamin" className="underline hover:text-primary">
+          Regulamin
+        </Link>{' '}
+        serwisu.
       </p>
+      <div className="flex flex-col gap-2">
+        <Button
+          disabled={selectedFiles.length === 0}
+          size="lg"
+          onClick={handleUploadButtonClicked}
+          className="h-12"
+        >
+          Wyślij
+        </Button>
+        {canSharePics && selectedFiles.length > 0 && (
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={handleSharePicsButtonClicked}
+            className="h-12"
+          >
+            <Share2Icon />
+            Udostępnij zdjęcia
+          </Button>
+        )}
+      </div>
       <ThanksScreen
         visible={showThanksScreen}
         onVisibleChange={setShowThanksScreen}
