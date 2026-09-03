@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PolitykaPrywatnosciRouteImport } from './routes/polityka-prywatnosci'
+import { Route as RegulaminRouteImport } from './routes/regulamin'
 import { Route as ScannedIdRouteImport } from './routes/scanned.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolitykaPrywatnosciRoute = PolitykaPrywatnosciRouteImport.update({
+  id: '/polityka-prywatnosci',
+  path: '/polityka-prywatnosci',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegulaminRoute = RegulaminRouteImport.update({
+  id: '/regulamin',
+  path: '/regulamin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScannedIdRoute = ScannedIdRouteImport.update({
@@ -25,27 +37,35 @@ const ScannedIdRoute = ScannedIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
+  '/regulamin': typeof RegulaminRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
+  '/regulamin': typeof RegulaminRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
+  '/regulamin': typeof RegulaminRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/scanned/$id'
+  fullPaths: '/' | '/polityka-prywatnosci' | '/regulamin' | '/scanned/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/scanned/$id'
-  id: '__root__' | '/' | '/scanned/$id'
+  to: '/' | '/polityka-prywatnosci' | '/regulamin' | '/scanned/$id'
+  id: '__root__' | '/' | '/polityka-prywatnosci' | '/regulamin' | '/scanned/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PolitykaPrywatnosciRoute: typeof PolitykaPrywatnosciRoute
+  RegulaminRoute: typeof RegulaminRoute
   ScannedIdRoute: typeof ScannedIdRoute
 }
 
@@ -56,6 +76,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/polityka-prywatnosci': {
+      id: '/polityka-prywatnosci'
+      path: '/polityka-prywatnosci'
+      fullPath: '/polityka-prywatnosci'
+      preLoaderRoute: typeof PolitykaPrywatnosciRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regulamin': {
+      id: '/regulamin'
+      path: '/regulamin'
+      fullPath: '/regulamin'
+      preLoaderRoute: typeof RegulaminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scanned/$id': {
@@ -70,6 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PolitykaPrywatnosciRoute: PolitykaPrywatnosciRoute,
+  RegulaminRoute: RegulaminRoute,
   ScannedIdRoute: ScannedIdRoute,
 }
 export const routeTree = rootRouteImport
