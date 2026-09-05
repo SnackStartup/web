@@ -18,7 +18,7 @@ export const Footer: React.FC<Props> = ({ className }) => {
     >
       <div className="flex items-center gap-1">
         <img src="/icon.png" className="size-6" alt="logo" />
-        <span className="font-bold text-primary">Stolik</span>
+        <span className="font-bold">Stolik</span>
       </div>
       <p className="max-w-sm text-xs text-neutral-500">
         Jesteśmy aplikacją, która pomaga restauracjom i gościom dzielić się

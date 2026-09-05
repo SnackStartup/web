@@ -33,6 +33,14 @@ function RouteComponent() {
     '/catcafe/3.jpg',
     '/catcafe/4.jpg',
     '/catcafe/5.jpg',
+    '/catcafe/6.jpg',
+    '/catcafe/7.jpg',
+    '/catcafe/8.jpg',
+    '/catcafe/9.jpg',
+    '/catcafe/10.jpg',
+    '/catcafe/11.jpg',
+    '/catcafe/12.jpg',
+    '/catcafe/13.jpg',
   ]
 
   /*
@@ -116,10 +124,10 @@ function RouteComponent() {
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row gap-2 items-center">
             <img
-              src="/coffee.jpg"
+              src="/catcafe/logo.jpg"
               className="size-12 rounded-full aspect-square object-cover"
             />
-            <h1 className="text-xs text-left">
+            <h1 className="text-xs text-left text-primary">
               Klubokawiarnia
               <br />
               „Pod Kocim Ogonem"
@@ -129,7 +137,7 @@ function RouteComponent() {
             className="flex flex-row gap-1 items-center"
             onClick={() => navigate({ to: '/' })}
           >
-            <h1 className="font-bold text-xl text-primary">Stolik</h1>
+            <h1 className="font-bold text-xl">Stolik</h1>
             <img src="/icon.png" className="size-10" />
           </div>
         </div>
