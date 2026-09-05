@@ -33,6 +33,8 @@ export const CarouselGallery: React.FC<Props> = ({ images }) => {
             <CarouselItem key={url} className="basis-1/2">
               <img
                 src={url}
+                loading="lazy"
+                decoding="async"
                 className="aspect-square object-cover"
                 onClick={() => setSelectedImage(url)}
               />
