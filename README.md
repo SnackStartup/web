@@ -37,3 +37,7 @@ Then one-time CA install on Android: Bezpieczeństwo i prywatność -> więcej -
 npm i
 npm run dev
 ```
+
+```
+~/Android/Sdk/emulator/emulator -avd Pixel_10 -no-snapshot-load
+```

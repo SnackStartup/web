@@ -23,7 +23,7 @@ export const Route = createRootRoute({
         title: 'Stolik',
       },
     ],
-    links: [{ rel: 'icon', href: '/icon.png' }],
+    links: [{ rel: 'icon', href: '/icon-96.png' }],
   }),
   shellComponent: RootDocument,
 })

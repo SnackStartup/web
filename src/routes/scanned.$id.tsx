@@ -16,7 +16,10 @@ import { Rating, RatingItem } from '#/components/ui/rating'
 import { HeartIcon, Share2Icon, ShareIcon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
-import { CarouselGallery } from '#/components/carousel-gallery'
+import {
+  CarouselGallery,
+  type GalleryImage,
+} from '#/components/carousel-gallery'
 import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import { analyticsCapture } from '#/lib/analytics'
@@ -40,21 +43,13 @@ function RouteComponent() {
     new Map(),
   )
 
-  const IMAGES: string[] = [
-    // '/catcafe/1.jpg',
-    // '/catcafe/2.jpg',
-    // '/catcafe/3.jpg',
-    // '/catcafe/4.jpg',
-    // '/catcafe/5.jpg',
-    '/catcafe/6.jpg',
-    '/catcafe/7.jpg',
-    '/catcafe/8.jpg',
-    '/catcafe/9.jpg',
-    '/catcafe/10.jpg',
-    '/catcafe/11.jpg',
-    '/catcafe/12.jpg',
-    '/catcafe/13.jpg',
-  ]
+  const IMAGES: GalleryImage[] = Array.from({ length: 8 }, (_, i) => {
+    const id = i + 6
+    return {
+      tile: `/catcafe/tile-${id}.webp`,
+      full: `/catcafe/full-${id}.webp`,
+    }
+  })
 
   /*
    *
@@ -170,18 +165,21 @@ function RouteComponent() {
   return (
     <Page className="flex flex-col gap-6 h-full relative overflow-hidden">
       <img
-        src="/catcafe/background.png"
+        src="/catcafe/background.webp"
         className="absolute inset-0 w-full h-full object-cover -z-10"
         decoding="async"
+        fetchPriority="low"
         alt=""
       />
       <div className="flex flex-col gap-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row gap-2 items-center">
             <img
-              src="/catcafe/logo.jpg"
+              src="/catcafe/logo-96.jpg"
               decoding="async"
               fetchPriority="high"
+              width={96}
+              height={96}
               className="size-12 rounded-full aspect-square object-cover"
             />
             <h1 className="text-xs text-left text-primary">
@@ -195,7 +193,7 @@ function RouteComponent() {
             onClick={() => navigate({ to: '/' })}
           >
             <h1 className="font-bold text-xl">Stolik</h1>
-            <img src="/icon.png" decoding="async" className="size-10" />
+            <img src="/icon-96.png" decoding="async" className="size-10" />
           </div>
         </div>
         <div className="flex flex-row gap-2">

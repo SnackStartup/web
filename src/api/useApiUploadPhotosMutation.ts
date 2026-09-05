@@ -13,7 +13,7 @@ export const useApiUploadPhotosMutation = () => {
   const progressRef = useRef<Map<File, number>>(new Map())
 
   const mutation = useMutation({
-    retry: 2,
+    retry: 0, // don't re-run the whole batch automatically
     mutationFn: async ({ files }: { files: File[] }) => {
       analyticsCapture('try_upload_photos', { count: files.length })
 
@@ -21,13 +21,17 @@ export const useApiUploadPhotosMutation = () => {
       progressRef.current = new Map()
       files.forEach((f) => progressRef.current.set(f, 0))
 
-      const results = await Promise.allSettled(
-        compressed.map((file, i) => {
-          const original = files[i]
-          const formData = new FormData()
-          formData.append('files', file)
-          return apiClient.post('/upload_photos', formData, {
+      const failed: unknown[] = []
+      // Sequential: 6 parallel uploads starve a 100 kbps link and time out.
+      for (let i = 0; i < compressed.length; i++) {
+        const file = compressed[i]
+        const original = files[i]
+        const formData = new FormData()
+        formData.append('files', file)
+        try {
+          await apiClient.post('/upload_photos', formData, {
             timeout: 120000,
+            'axios-retry': { retries: 1 }, // override client.ts's global 3x retry
             headers: { 'X-Upload-Id': randomUploadId() },
             onUploadProgress: (e) => {
               if (!e.total) return
@@ -35,23 +39,16 @@ export const useApiUploadPhotosMutation = () => {
               progressRef.current.set(original, pct)
             },
           })
-        }),
-      )
+        } catch (error) {
+          failed.push(error)
+        }
+      }
 
-      const failed = results.filter(
-        (result): result is PromiseRejectedResult =>
-          result.status === 'rejected',
-      )
       if (failed.length > 0) {
-        const first = failed[0].reason
-        const message = `${failed.length} z ${results.length} zdjęć nie zostało wysłanych`
-        return Promise.reject(
-          first instanceof Error
-            ? new Error(message, { cause: first })
-            : new Error(message),
+        throw new Error(
+          `${failed.length} z ${files.length} zdjęć nie zostało wysłanych`,
         )
       }
-      return results
     },
   })
 

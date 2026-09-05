@@ -39,7 +39,7 @@ export const ThanksScreen: React.FC<Props> = ({ visible, onVisibleChange }) => {
         `}
     >
       <img
-        src="/catcafe/background.png"
+        src="/catcafe/background.webp"
         className="absolute inset-0 w-full h-full object-cover z-0"
         alt=""
       />
