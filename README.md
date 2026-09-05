@@ -37,7 +37,3 @@ Then one-time CA install on Android: Bezpieczeństwo i prywatność -> więcej -
 npm i
 npm run dev
 ```
-
-## TODO
-
-make sure ready for prod, security, load, etc.

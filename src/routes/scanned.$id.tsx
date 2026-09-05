@@ -3,7 +3,14 @@ import { Button } from '#/components/ui/button'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEventHandler } from 'react'
-import { FaLocationDot, FaCamera, FaImage } from 'react-icons/fa6'
+import {
+  FaLocationDot,
+  FaCamera,
+  FaImage,
+  FaFacebook,
+  FaInstagram,
+  FaAppStoreIos,
+} from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
 import { HeartIcon, Share2Icon, ShareIcon, StarIcon } from 'lucide-react'
@@ -11,6 +18,8 @@ import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
 import { CarouselGallery } from '#/components/carousel-gallery'
 import { usePostHog } from '@posthog/react'
+import { Separator } from '#/components/ui/separator'
+import { Spinner } from '#/components/ui/spinner'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -26,13 +35,14 @@ function RouteComponent() {
   const canSharePics =
     navigator?.canShare && navigator.canShare({ files: selectedFiles })
   const posthog = usePostHog()
+  const isUploading = apiUploadPhotosMutation.isPending
 
   const IMAGES: string[] = [
-    '/catcafe/1.jpg',
-    '/catcafe/2.jpg',
-    '/catcafe/3.jpg',
-    '/catcafe/4.jpg',
-    '/catcafe/5.jpg',
+    // '/catcafe/1.jpg',
+    // '/catcafe/2.jpg',
+    // '/catcafe/3.jpg',
+    // '/catcafe/4.jpg',
+    // '/catcafe/5.jpg',
     '/catcafe/6.jpg',
     '/catcafe/7.jpg',
     '/catcafe/8.jpg',
@@ -96,6 +106,14 @@ function RouteComponent() {
     }
   }
 
+  const handleFacebookButtonClicked = async () => {
+    posthog.capture('facebook_clicked')
+  }
+
+  const handleInstagramButtonClicked = async () => {
+    posthog.capture('instagram_clicked')
+  }
+
   const handleSharePicsButtonClicked = async () => {
     posthog.capture('shared_pics', {
       files: selectedFiles.map((file) => file.name),
@@ -119,7 +137,12 @@ function RouteComponent() {
    */
 
   return (
-    <Page className="flex flex-col gap-6 h-full">
+    <Page className="flex flex-col gap-6 h-full relative overflow-hidden">
+      <img
+        src="/catcafe/background.png"
+        className="absolute inset-0 w-full h-full object-cover -z-10"
+        alt=""
+      />
       <div className="flex flex-col gap-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row gap-2 items-center">
@@ -147,8 +170,8 @@ function RouteComponent() {
         </div>
         <div className="flex flex-row items-center justify-between">
           <Rating
-            defaultValue={4}
-            className="gap-1 text-amber-500"
+            defaultValue={5}
+            className="gap-1 text-[#f8cc2f]"
             onClick={handleRatingClicked}
           >
             {Array.from({ length: 5 }, (_, i) => (
@@ -157,24 +180,63 @@ function RouteComponent() {
               </RatingItem>
             ))}
           </Rating>
-          <Button
-            size="sm"
-            className="p-0"
-            variant="ghost"
-            onClick={handleShareButtonClicked}
-          >
-            <Share2Icon className="size-5" />
-          </Button>
+          <div className="flex flex-row gap-4 items-center">
+            <Button
+              size="sm"
+              className="p-0"
+              variant="ghost"
+              render={
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.instagram.com/podkocimogonem?igsi=MTZhdTdjbnI0dmQ2Ng=="
+                  onClick={handleInstagramButtonClicked}
+                />
+              }
+            >
+              <FaInstagram className="size-5" />
+            </Button>
+            <Button
+              size="sm"
+              className="p-0"
+              variant="ghost"
+              render={
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.facebook.com/profile.php?id=61589769376486"
+                  onClick={handleFacebookButtonClicked}
+                />
+              }
+            >
+              <FaFacebook className="size-5" />
+            </Button>
+            <Button
+              size="sm"
+              className="p-0"
+              variant="ghost"
+              onClick={handleShareButtonClicked}
+            >
+              <Share2Icon className="size-5" />
+            </Button>
+          </div>
         </div>
       </div>
+      <Separator className="bg-primary -my-2 opacity-25" />
       <CarouselGallery images={IMAGES} />
+      <Separator className="bg-primary -my-2 opacity-25" />
       <div>
-        <p className="text-neutral-400 text-sm">
-          Godne relacji? Pokaż nam swój talerz! Dodaj zdjęcie i pomóż innym
-          zobaczyć nasze pyszności, a najładniejsze kadry trafiają na nasze
-          sociale.
+        <p className="text-sm">
+          Uchwyciłeś pyszne danie,{' '}
+          <span className="text-primary">uroczy moment z kotem</span> albo
+          świetną chwilę u nas? Podziel się zdjęciami! Pomóż innym odkryć nasz
+          klimat, a{' '}
+          <span className="text-primary">
+            najpiękniejsze kadry znajdziesz na naszym profilu!
+          </span>
         </p>
       </div>
+      <Separator className="bg-primary -my-2 opacity-25" />
       <div className="flex flex-col gap-2">
         <input
           ref={imageCaptureInputRef}
@@ -236,12 +298,13 @@ function RouteComponent() {
       </p>
       <div className="flex flex-col gap-2">
         <Button
-          disabled={selectedFiles.length === 0}
+          disabled={selectedFiles.length === 0 || isUploading}
           size="lg"
           onClick={handleUploadButtonClicked}
           className="h-12"
         >
-          Wyślij
+          {isUploading && <Spinner data-icon="inline-start" />}
+          {isUploading ? 'Wysyłanie' : 'Wyślij'}
         </Button>
         {canSharePics && selectedFiles.length > 0 && (
           <Button

@@ -8,7 +8,7 @@ export const useApiUploadPhotosMutation = () => {
       for (const file of files) {
         formData.append('files', file)
       }
-      apiClient.post('/upload_photos', formData, {
+      return apiClient.post('/upload_photos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
     },
