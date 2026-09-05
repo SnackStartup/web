@@ -1,5 +1,34 @@
-const MAX_DIMENSION = 1600
-const JPEG_QUALITY = 0.82
+const MAX_DIMENSION = 1280
+const JPEG_QUALITY = 0.72
+
+async function drawToJpeg(
+  draw: (ctx: CanvasRenderingContext2D, width: number, height: number) => void,
+  width: number,
+  height: number,
+): Promise<Blob | null> {
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height))
+  const w = Math.max(1, Math.round(width * scale))
+  const h = Math.max(1, Math.round(height * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+  ctx.fillStyle = 'white' // PNG/HEIC transparency -> white bg
+  ctx.fillRect(0, 0, w, h)
+  draw(ctx, w, h)
+  return new Promise((resolve) =>
+    canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY),
+  )
+}
+
+function toJpegFile(blob: Blob, original: File): File {
+  const baseName = original.name.replace(/\.[^.]+$/, '').trim() || 'photo'
+  return new File([blob], `${baseName}.jpg`, {
+    type: 'image/jpeg',
+    lastModified: Date.now(),
+  })
+}
 
 export async function compressImage(file: File): Promise<File> {
   const isBitmapImage =
@@ -9,43 +38,40 @@ export async function compressImage(file: File): Promise<File> {
   if (!isBitmapImage) return file
 
   try {
+    // Fast path: createImageBitmap
     const bitmap = await createImageBitmap(file)
-    const scale = Math.min(
-      1,
-      MAX_DIMENSION / Math.max(bitmap.width, bitmap.height),
+    const { width, height } = bitmap
+    const blob = await drawToJpeg(
+      (ctx, w, h) => ctx.drawImage(bitmap, 0, 0, w, h),
+      width,
+      height,
     )
-    const width = Math.max(1, Math.round(bitmap.width * scale))
-    const height = Math.max(1, Math.round(bitmap.height * scale))
-
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    const context = canvas.getContext('2d')
-    if (!context) {
-      bitmap.close()
-      return file
-    }
-
-    context.fillStyle = 'white' // handle PNG transparency -> white bg
-    context.fillRect(0, 0, width, height)
-    context.drawImage(bitmap, 0, 0, width, height)
     bitmap.close()
-
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(
-        resolve,
-        'image/jpeg',
-        file.size > 3 * 1024 * 1024 ? 0.62 : JPEG_QUALITY,
-      ),
-    )
-    if (!blob || blob.size >= file.size) return file // keep if already small
-
-    const baseName = file.name.replace(/\.[^.]+$/, '').trim() || 'photo'
-    return new File([blob], `${baseName}.jpg`, {
-      type: 'image/jpeg',
-      lastModified: Date.now(),
-    })
+    if (!blob || blob.size >= file.size) return file
+    return toJpegFile(blob, file)
   } catch {
-    return file // HEIC etc. that canvas can't decode -> original
+    // HEIC path: createImageBitmap can't decode it, but <img> can (Safari/Chrome)
+    const url = URL.createObjectURL(file)
+    try {
+      const img = new Image()
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error('decode failed'))
+        img.src = url
+      })
+      const { naturalWidth: width, naturalHeight: height } = img
+      if (!width || !height) return file
+      const blob = await drawToJpeg(
+        (ctx, w, h) => ctx.drawImage(img, 0, 0, w, h),
+        width,
+        height,
+      )
+      if (!blob || blob.size >= file.size) return file
+      return toJpegFile(blob, file)
+    } catch {
+      return file // truly undecodable -> send original
+    } finally {
+      URL.revokeObjectURL(url)
+    }
   }
 }

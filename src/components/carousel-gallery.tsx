@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Carousel, CarouselContent, CarouselItem } from './ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { Dialog, DialogContent } from './ui/dialog'
 
-type Props = {
-  images: string[]
-}
+export type GalleryImage = { tile: string; full: string }
+
+type Props = { images: GalleryImage[] }
 
 export const CarouselGallery: React.FC<Props> = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -13,11 +13,7 @@ export const CarouselGallery: React.FC<Props> = ({ images }) => {
   return (
     <div className="relative">
       <Carousel
-        opts={{
-          align: 'start',
-          loop: true,
-          duration: 40,
-        }}
+        opts={{ align: 'start', loop: true, duration: 40 }}
         plugins={[
           Autoplay({
             delay: 3000,
@@ -29,14 +25,19 @@ export const CarouselGallery: React.FC<Props> = ({ images }) => {
         className="w-full"
       >
         <CarouselContent>
-          {images.map((url) => (
-            <CarouselItem key={url} className="basis-1/2">
+          {images.map((img, i) => (
+            <CarouselItem key={img.tile} className="basis-1/2">
               <img
-                src={url}
-                loading="lazy"
+                src={img.tile}
+                srcSet={`${img.tile} 480w, ${img.full} 960w`}
+                sizes="(min-width: 768px) 500px, 50vw"
+                width={480}
+                height={480}
+                loading={i === 0 ? 'eager' : 'lazy'}
                 decoding="async"
+                fetchPriority={i === 0 ? 'high' : 'auto'}
                 className="aspect-square object-cover"
-                onClick={() => setSelectedImage(url)}
+                onClick={() => setSelectedImage(img.full)}
               />
             </CarouselItem>
           ))}
@@ -54,7 +55,6 @@ export const CarouselGallery: React.FC<Props> = ({ images }) => {
           <img
             src={selectedImage ?? undefined}
             className="w-full h-full rounded-lg object-cover"
-            loading="lazy"
           />
         </DialogContent>
       </Dialog>
