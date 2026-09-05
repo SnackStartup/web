@@ -32,7 +32,11 @@ export async function compressImage(file: File): Promise<File> {
     bitmap.close()
 
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY),
+      canvas.toBlob(
+        resolve,
+        'image/jpeg',
+        file.size > 3 * 1024 * 1024 ? 0.62 : JPEG_QUALITY,
+      ),
     )
     if (!blob || blob.size >= file.size) return file // keep if already small
 

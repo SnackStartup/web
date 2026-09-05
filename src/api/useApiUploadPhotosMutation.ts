@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useRef } from 'react'
 import { apiClient } from './client'
 import { compressImage } from '#/lib/compress-image'
-import { usePostHog } from '@posthog/react'
+import { analyticsCapture } from '#/lib/analytics'
 
 const randomUploadId = () =>
   typeof crypto.randomUUID === 'function'
@@ -10,14 +10,12 @@ const randomUploadId = () =>
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
 
 export const useApiUploadPhotosMutation = () => {
-  const postHog = usePostHog()
-  // keyed by the original File -> progress 0..100
   const progressRef = useRef<Map<File, number>>(new Map())
 
   const mutation = useMutation({
     retry: 2,
     mutationFn: async ({ files }: { files: File[] }) => {
-      postHog.capture('try_upload_photos', { count: files.length })
+      analyticsCapture('try_upload_photos', { count: files.length })
 
       const compressed = await Promise.all(files.map(compressImage))
       progressRef.current = new Map()
