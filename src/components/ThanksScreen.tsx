@@ -30,22 +30,27 @@ export const ThanksScreen: React.FC<Props> = ({ visible, onVisibleChange }) => {
 
   return (
     <div
-      // kills pinch-to-zoom on mobile
       style={{ touchAction: 'none' }}
       className={`
-          absolute inset-0 bg-white
-          flex flex-col items-center justify-center gap-2
+          absolute inset-0 bg-white overflow-hidden
           transition-opacity duration-500
           pointer-events-none
           ${visible ? 'opacity-100' : 'opacity-0'}
         `}
     >
-      {visible && (
-        <div className="absolute left-0 -top-1 h-3 w-screen overflow-hidden rounded-full bg-primary animate-countdown" />
-      )}
-      <FaHeart className="size-20 text-pink-500 animate-bounce" />
-      <h1 className="text-primary text-3xl font-bold">Dziękujemy!</h1>
-      <h2 className="text-neutral-400">Zgłoszenie zostało przyjęte</h2>
+      <img
+        src="/catcafe/background.png"
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        alt=""
+      />
+      <div className="relative z-10 flex flex-col items-center justify-center gap-2 h-full">
+        {visible && (
+          <div className="absolute left-0 -top-1 h-3 w-screen overflow-hidden rounded-r-full bg-primary animate-countdown" />
+        )}
+        <FaHeart className="size-20 text-pink-500 animate-bounce" />
+        <h1 className="text-primary text-3xl font-bold">Dziękujemy!</h1>
+        <h2 className="text-neutral-400">Zgłoszenie zostało przyjęte</h2>
+      </div>
     </div>
   )
 }
