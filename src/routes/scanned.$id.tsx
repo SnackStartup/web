@@ -36,6 +36,7 @@ function RouteComponent() {
     navigator?.canShare && navigator.canShare({ files: selectedFiles })
   const posthog = usePostHog()
   const isUploading = apiUploadPhotosMutation.isPending
+  const [uploadFailed, setUploadFailed] = useState(false)
 
   const IMAGES: string[] = [
     // '/catcafe/1.jpg',
@@ -76,6 +77,7 @@ function RouteComponent() {
   }
 
   const handleUploadButtonClicked = () => {
+    setUploadFailed(false)
     apiUploadPhotosMutation.mutate(
       { files: selectedFiles },
       {
@@ -84,8 +86,7 @@ function RouteComponent() {
           setShowThanksScreen(true)
         },
         onError(error) {
-          console.error(error)
-          navigate({ to: '/scanned/$id', params: { id: '1' } })
+          setUploadFailed(true)
         },
       },
     )
@@ -141,6 +142,7 @@ function RouteComponent() {
       <img
         src="/catcafe/background.png"
         className="absolute inset-0 w-full h-full object-cover -z-10"
+        decoding="async"
         alt=""
       />
       <div className="flex flex-col gap-2">
@@ -148,6 +150,8 @@ function RouteComponent() {
           <div className="flex flex-row gap-2 items-center">
             <img
               src="/catcafe/logo.jpg"
+              decoding="async"
+              fetchPriority="high"
               className="size-12 rounded-full aspect-square object-cover"
             />
             <h1 className="text-xs text-left text-primary">
@@ -161,7 +165,7 @@ function RouteComponent() {
             onClick={() => navigate({ to: '/' })}
           >
             <h1 className="font-bold text-xl">Stolik</h1>
-            <img src="/icon.png" className="size-10" />
+            <img src="/icon.png" decoding="async" className="size-10" />
           </div>
         </div>
         <div className="flex flex-row gap-2">
@@ -282,6 +286,39 @@ function RouteComponent() {
           </>
         )}
       </div>
+      <div className="flex flex-col gap-2">
+        {uploadFailed && (
+          <p role="alert" className="text-sm text-destructive text-center">
+            Nie udało się wysłać zdjęć. Sprawdź połączenie i spróbuj ponownie.
+          </p>
+        )}
+        <Button
+          disabled={selectedFiles.length === 0 || isUploading}
+          size="lg"
+          onClick={handleUploadButtonClicked}
+          className="h-12"
+        >
+          <span data-icon="inline-start">{isUploading && <Spinner />}</span>
+          <span translate="no">
+            {isUploading
+              ? 'Wysyłanie'
+              : uploadFailed
+                ? 'Spróbuj ponownie'
+                : 'Wyślij'}
+          </span>
+        </Button>
+        {canSharePics && selectedFiles.length > 0 && (
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={handleSharePicsButtonClicked}
+            className="h-12"
+          >
+            <Share2Icon />
+            Udostępnij zdjęcia na swoich socialach
+          </Button>
+        )}
+      </div>
       <p className="text-xs text-neutral-400">
         Klikając przycisk „Wyślij", akceptujesz{' '}
         <Link
@@ -296,28 +333,6 @@ function RouteComponent() {
         </Link>{' '}
         serwisu.
       </p>
-      <div className="flex flex-col gap-2">
-        <Button
-          disabled={selectedFiles.length === 0 || isUploading}
-          size="lg"
-          onClick={handleUploadButtonClicked}
-          className="h-12"
-        >
-          {isUploading && <Spinner data-icon="inline-start" />}
-          {isUploading ? 'Wysyłanie' : 'Wyślij'}
-        </Button>
-        {canSharePics && selectedFiles.length > 0 && (
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={handleSharePicsButtonClicked}
-            className="h-12"
-          >
-            <Share2Icon />
-            Udostępnij zdjęcia
-          </Button>
-        )}
-      </div>
       <ThanksScreen
         visible={showThanksScreen}
         onVisibleChange={setShowThanksScreen}
