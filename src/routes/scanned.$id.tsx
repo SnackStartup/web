@@ -37,6 +37,9 @@ function RouteComponent() {
   const posthog = usePostHog()
   const isUploading = apiUploadPhotosMutation.isPending
   const [uploadFailed, setUploadFailed] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
+    new Map(),
+  )
 
   const IMAGES: string[] = [
     // '/catcafe/1.jpg',
@@ -53,6 +56,31 @@ function RouteComponent() {
     '/catcafe/12.jpg',
     '/catcafe/13.jpg',
   ]
+
+  /*
+   *
+   * Effects
+   *
+   **/
+
+  useEffect(() => {
+    if (!isUploading) return
+    const id = setInterval(() => {
+      setUploadProgress((prev) => {
+        const next = new Map(prev)
+        let changed = false
+        for (const f of prev.keys()) {
+          const p = apiUploadPhotosMutation.getProgress(f)
+          if (p !== prev.get(f)) {
+            next.set(f, p)
+            changed = true
+          }
+        }
+        return changed ? next : prev
+      })
+    }, 100)
+    return () => clearInterval(id)
+  }, [isUploading, apiUploadPhotosMutation.getProgress])
 
   /*
    *
@@ -78,14 +106,17 @@ function RouteComponent() {
 
   const handleUploadButtonClicked = () => {
     setUploadFailed(false)
+    setUploadProgress(new Map(selectedFiles.map((f) => [f, 0])))
     apiUploadPhotosMutation.mutate(
       { files: selectedFiles },
       {
         onSuccess() {
+          setUploadProgress(new Map())
           setSelectedFiles([])
           setShowThanksScreen(true)
         },
         onError(error) {
+          setUploadProgress(new Map())
           setUploadFailed(true)
         },
       },
@@ -263,6 +294,8 @@ function RouteComponent() {
           <FileUploadGallery
             files={selectedFiles}
             onFilesChange={setSelectedFiles}
+            progress={uploadProgress}
+            uploading={isUploading}
           />
         )}
         {selectedFiles.length === 0 && (
@@ -315,7 +348,7 @@ function RouteComponent() {
             className="h-12"
           >
             <Share2Icon />
-            Udostępnij zdjęcia na swoich socialach
+            Udostępnij zdjęcia znajomym
           </Button>
         )}
       </div>

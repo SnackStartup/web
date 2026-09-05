@@ -3,7 +3,7 @@ import axiosRetry from 'axios-retry'
 
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL
-  if (import.meta.env.PROD) {
+  if (import.meta.env.PROD || typeof window === 'undefined') {
     return envUrl
   }
   const hostname = window.location.hostname

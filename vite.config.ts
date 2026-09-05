@@ -21,7 +21,7 @@ export default defineConfig(({ command }) => {
       tailwindcss(),
       tanstackStart({
         spa: {
-          enabled: true,
+          enabled: false, // enable SSR
         },
       }),
       viteReact(),

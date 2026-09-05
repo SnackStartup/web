@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { useRef } from 'react'
 import { apiClient } from './client'
 import { compressImage } from '#/lib/compress-image'
 import { usePostHog } from '@posthog/react'
@@ -10,22 +11,31 @@ const randomUploadId = () =>
 
 export const useApiUploadPhotosMutation = () => {
   const postHog = usePostHog()
+  // keyed by the original File -> progress 0..100
+  const progressRef = useRef<Map<File, number>>(new Map())
 
-  return useMutation({
+  const mutation = useMutation({
     retry: 2,
     mutationFn: async ({ files }: { files: File[] }) => {
       postHog.capture('try_upload_photos', { count: files.length })
 
       const compressed = await Promise.all(files.map(compressImage))
+      progressRef.current = new Map()
+      files.forEach((f) => progressRef.current.set(f, 0))
 
-      // one small POST per photo; a dropped connection only fails that photo
       const results = await Promise.allSettled(
-        compressed.map((file) => {
+        compressed.map((file, i) => {
+          const original = files[i]
           const formData = new FormData()
-          formData.append('files', file) // same field name -> backend unchanged
+          formData.append('files', file)
           return apiClient.post('/upload_photos', formData, {
             timeout: 120000,
             headers: { 'X-Upload-Id': randomUploadId() },
+            onUploadProgress: (e) => {
+              if (!e.total) return
+              const pct = Math.round((e.loaded / e.total) * 100)
+              progressRef.current.set(original, pct)
+            },
           })
         }),
       )
@@ -46,4 +56,8 @@ export const useApiUploadPhotosMutation = () => {
       return results
     },
   })
+
+  const getProgress = (file: File) => progressRef.current.get(file) ?? 0
+
+  return { ...mutation, getProgress }
 }
