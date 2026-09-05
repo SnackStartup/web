@@ -17,9 +17,9 @@ import { HeartIcon, Share2Icon, ShareIcon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
 import { CarouselGallery } from '#/components/carousel-gallery'
-import { usePostHog } from '@posthog/react'
 import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
+import { analyticsCapture } from '#/lib/analytics'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -34,7 +34,6 @@ function RouteComponent() {
   const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
   const canSharePics =
     navigator?.canShare && navigator.canShare({ files: selectedFiles })
-  const posthog = usePostHog()
   const isUploading = apiUploadPhotosMutation.isPending
   const [uploadFailed, setUploadFailed] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
@@ -124,7 +123,7 @@ function RouteComponent() {
   }
 
   const handleShareButtonClicked = async () => {
-    posthog.capture('shared_page')
+    analyticsCapture('shared_page')
     const shareData = {
       title: 'Stolik — Pod Kocim Ogonem',
       text: 'Zobacz zdjęcia dań i podziel się swoim talerzem!',
@@ -139,15 +138,15 @@ function RouteComponent() {
   }
 
   const handleFacebookButtonClicked = async () => {
-    posthog.capture('facebook_clicked')
+    analyticsCapture('facebook_clicked')
   }
 
   const handleInstagramButtonClicked = async () => {
-    posthog.capture('instagram_clicked')
+    analyticsCapture('instagram_clicked')
   }
 
   const handleSharePicsButtonClicked = async () => {
-    posthog.capture('shared_pics', {
+    analyticsCapture('shared_pics', {
       files: selectedFiles.map((file) => file.name),
     })
     if (canSharePics) {
@@ -159,7 +158,7 @@ function RouteComponent() {
   }
 
   const handleRatingClicked = () => {
-    posthog.capture('rating_clicked')
+    analyticsCapture('rating_clicked')
   }
 
   /*
