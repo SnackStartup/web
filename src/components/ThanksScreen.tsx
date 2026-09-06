@@ -8,6 +8,7 @@ type Props = {
   onVisibleChange: (visible: boolean) => void
   backgroundUri: string
   backgroundOpacity?: string
+  neon?: boolean
 }
 
 export const ThanksScreen: React.FC<Props> = ({
@@ -15,6 +16,7 @@ export const ThanksScreen: React.FC<Props> = ({
   onVisibleChange,
   backgroundUri,
   backgroundOpacity,
+  neon,
 }) => {
   useEffect(() => {
     if (!visible) return
@@ -58,7 +60,16 @@ export const ThanksScreen: React.FC<Props> = ({
           <div className="absolute left-0 -top-1 h-3 w-screen overflow-hidden rounded-r-full bg-primary animate-countdown" />
         )}
         <FaHeart className="size-20 text-pink-500 animate-bounce" />
-        <h1 className="text-primary text-3xl font-bold">Dziękujemy!</h1>
+        <h1
+          className="text-primary text-3xl font-bold"
+          style={
+            neon
+              ? { animation: 'neon-text-pulse 2.5s ease-in-out infinite' }
+              : undefined
+          }
+        >
+          Dziękujemy!
+        </h1>
         <h2 className="text-neutral-400">Zgłoszenie zostało przyjęte</h2>
       </div>
     </div>

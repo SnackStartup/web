@@ -39,7 +39,7 @@ export const places = {
     `,
     galleryCount: 10,
     primaryColor: '#a57b62',
-    backgroundOpacity: '30%',
+    backgroundOpacity: '40%',
   },
   oops: {
     suffix: 'Bar',

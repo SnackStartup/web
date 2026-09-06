@@ -177,3 +177,15 @@ body,
   filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff)
     drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff);
 }
+
+@keyframes neon-logo-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px #ff6ec7) drop-shadow(0 0 10px #ff6ec7)
+      drop-shadow(0 0 20px rgba(255, 110, 199, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #41e2ff) drop-shadow(0 0 10px #41e2ff)
+      drop-shadow(0 0 20px rgba(65, 226, 255, 0.6));
+  }
+}

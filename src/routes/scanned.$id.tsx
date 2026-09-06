@@ -50,6 +50,7 @@ function RouteComponent() {
   const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
     new Map(),
   )
+  const isUploadingDisabled = selectedFiles.length === 0 || isUploading
   const { id: placeId } = Route.useParams()
   const place = places[placeId as keyof typeof places] as Place | undefined
   const placeProps = { place_id: placeId, place_name: place?.name }
@@ -226,7 +227,14 @@ function RouteComponent() {
               height={96}
               className="size-12 rounded-full aspect-square object-cover"
             />
-            <h1 className="text-xs text-left text-primary">
+            <h1
+              className="text-xs text-left text-primary font-semibold"
+              style={
+                placeId === 'oops'
+                  ? { animation: 'neon-text-pulse 2.5s ease-in-out infinite' }
+                  : {}
+              }
+            >
               {place.suffix && (
                 <>
                   {place.suffix}
@@ -244,7 +252,14 @@ function RouteComponent() {
             <img
               src="/icon-96.png"
               decoding="async"
-              className="size-10 outline-logo"
+              className="size-10"
+              style={
+                placeId === 'oops'
+                  ? {
+                      animation: 'neon-logo-pulse 2.5s ease-in-out infinite',
+                    }
+                  : {}
+              }
             />
           </div>
         </div>
@@ -379,10 +394,15 @@ function RouteComponent() {
           </p>
         )}
         <Button
-          disabled={selectedFiles.length === 0 || isUploading}
+          disabled={isUploadingDisabled}
           size="lg"
           onClick={handleUploadButtonClicked}
           className="h-12"
+          style={
+            placeId === 'oops' && !isUploadingDisabled
+              ? { ...oopsNeonStyles, borderWidth: '4px' }
+              : undefined
+          }
         >
           <span data-icon="inline-start">{isUploading && <Spinner />}</span>
           <span translate="no">
@@ -424,6 +444,7 @@ function RouteComponent() {
         onVisibleChange={setShowThanksScreen}
         backgroundUri={`/places/${placeId}/background.webp`}
         backgroundOpacity={place.backgroundOpacity}
+        neon={placeId === 'oops'}
       />
     </Page>
   )
