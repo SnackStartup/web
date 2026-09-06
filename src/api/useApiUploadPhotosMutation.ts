@@ -28,17 +28,19 @@ export const useApiUploadPhotosMutation = () => {
       files.forEach((f) => progressRef.current.set(f, 0))
 
       const failed: unknown[] = []
+      const uploadId = randomUploadId()
       // Sequential: 6 parallel uploads starve a 100 kbps link and time out.
       for (let i = 0; i < compressed.length; i++) {
         const file = compressed[i]
         const original = files[i]
         const formData = new FormData()
         formData.append('files', file)
+        formData.append('upload_id', uploadId)
+        formData.append('place_id', placeId)
         try {
           await apiClient.post('/upload_photos', formData, {
             timeout: 120000,
             'axios-retry': { retries: 1 }, // override client.ts's global 3x retry
-            headers: { 'X-Upload-Id': randomUploadId(), 'X-Place-Id': placeId },
             onUploadProgress: (e) => {
               if (!e.total) return
               const pct = Math.round((e.loaded / e.total) * 100)

@@ -53,7 +53,7 @@ export const places = {
     `,
     galleryCount: 6,
     primaryColor: '#805ae5',
-    backgroundOpacity: '20%',
+    backgroundOpacity: '30%',
     colorScheme: 'dark',
   },
 } as const satisfies Record<string, Place>
