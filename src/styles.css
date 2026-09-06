@@ -63,7 +63,7 @@ body,
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   /* --primary: oklch(0.205 0 0); */
-  --primary: #d33886;
+  --primary: #083948;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -134,5 +134,23 @@ body,
   }
   html {
     @apply font-sans;
+  }
+}
+
+@keyframes neon-pulse {
+  0%,
+  100% {
+    border-color: #ff6ec7;
+    box-shadow:
+      0 0 6px #ff6ec7,
+      0 0 12px #ff6ec7,
+      0 0 18px #ff6ec7;
+  }
+  50% {
+    border-color: #41e2ff;
+    box-shadow:
+      0 0 6px #41e2ff,
+      0 0 12px #41e2ff,
+      0 0 18px #41e2ff;
   }
 }

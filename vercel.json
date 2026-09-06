@@ -6,7 +6,7 @@
       "destination": "/manifest.webmanifest"
     },
     { "source": "/workbox-([^/]+)\\.js", "destination": "/workbox-$1.js" },
-    { "source": "/catcafe/(.*)", "destination": "/catcafe/$1" },
+    { "source": "/places/(.*)", "destination": "/places/$1" },
     { "source": "/icon-96.png", "destination": "/icon-96.png" },
     { "source": "/(.*)", "destination": "/" }
   ],
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "source": "/catcafe/(.*)",
+      "source": "/places/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

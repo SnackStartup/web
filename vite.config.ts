@@ -32,7 +32,7 @@ export default defineConfig(({ command }) => {
         manifest: {
           name: 'Stolik',
           short_name: 'Stolik',
-          description: 'Stolik — Pod Kocim Ogonem',
+          description: 'Stolik',
           start_url: '/',
           display: 'standalone',
           theme_color: '#d33886',

@@ -1,6 +1,11 @@
 import { Page } from '#/components/Page'
 import { Button } from '#/components/ui/button'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Link,
+  useLayoutEffect,
+  useNavigate,
+} from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEventHandler } from 'react'
 import {
@@ -9,20 +14,23 @@ import {
   FaImage,
   FaFacebook,
   FaInstagram,
-  FaAppStoreIos,
 } from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
-import { HeartIcon, Share2Icon, ShareIcon, StarIcon } from 'lucide-react'
+import { Share2Icon, StarIcon } from 'lucide-react'
 import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
 import { ThanksScreen } from '#/components/ThanksScreen'
-import {
-  CarouselGallery,
-  type GalleryImage,
-} from '#/components/carousel-gallery'
+import { CarouselGallery } from '#/components/carousel-gallery'
+import type { GalleryImage } from '#/components/carousel-gallery'
 import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import { analyticsCapture } from '#/lib/analytics'
+import { places } from '#/data/places'
+import type { Place } from '#/data/places'
+import { HighlightedText } from '#/components/highlighted-text'
+import { NotFoundComponent } from '#/components/NotFoundComponent'
+import invariant from 'tiny-invariant'
+import { cn } from '#/lib/utils'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -42,14 +50,15 @@ function RouteComponent() {
   const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
     new Map(),
   )
-
-  const IMAGES: GalleryImage[] = Array.from({ length: 8 }, (_, i) => {
-    const id = i + 6
-    return {
-      tile: `/catcafe/tile-${id}.webp`,
-      full: `/catcafe/full-${id}.webp`,
-    }
-  })
+  const { id: placeId } = Route.useParams()
+  const place = places[placeId as keyof typeof places] as Place | undefined
+  const placeProps = { place_id: placeId, place_name: place?.name }
+  const galleryImages: GalleryImage[] = [
+    ...Array(place?.galleryCount ?? 0).keys(),
+  ].map((n) => ({
+    tile: `/places/${placeId}/tile-${n + 1}.webp`,
+    full: `/places/${placeId}/full-${n + 1}.webp`,
+  }))
 
   /*
    *
@@ -75,6 +84,12 @@ function RouteComponent() {
     }, 100)
     return () => clearInterval(id)
   }, [isUploading, apiUploadPhotosMutation.getProgress])
+
+  useLayoutEffect(() => {
+    const isDark = place?.colorScheme === 'dark'
+    document.documentElement.classList.toggle('dark', isDark)
+    return () => document.documentElement.classList.remove('dark')
+  }, [place?.colorScheme])
 
   /*
    *
@@ -102,7 +117,7 @@ function RouteComponent() {
     setUploadFailed(false)
     setUploadProgress(new Map(selectedFiles.map((f) => [f, 0])))
     apiUploadPhotosMutation.mutate(
-      { files: selectedFiles },
+      { files: selectedFiles, placeId },
       {
         onSuccess() {
           setUploadProgress(new Map())
@@ -118,9 +133,10 @@ function RouteComponent() {
   }
 
   const handleShareButtonClicked = async () => {
-    analyticsCapture('shared_page')
+    invariant(place)
+    analyticsCapture('shared_page', placeProps)
     const shareData = {
-      title: 'Stolik — Pod Kocim Ogonem',
+      title: `Stolik — ${place.name}`,
       text: 'Zobacz zdjęcia dań i podziel się swoim talerzem!',
       url: window.location.href,
     }
@@ -133,27 +149,29 @@ function RouteComponent() {
   }
 
   const handleFacebookButtonClicked = async () => {
-    analyticsCapture('facebook_clicked')
+    analyticsCapture('facebook_clicked', placeProps)
   }
 
   const handleInstagramButtonClicked = async () => {
-    analyticsCapture('instagram_clicked')
+    analyticsCapture('instagram_clicked', placeProps)
   }
 
   const handleSharePicsButtonClicked = async () => {
+    invariant(place)
     analyticsCapture('shared_pics', {
+      ...placeProps,
       files: selectedFiles.map((file) => file.name),
     })
     if (canSharePics) {
       await navigator.share({
-        title: 'Stolik — Pod Kocim Ogonem',
+        title: `Stolik — ${place.name}`,
         files: selectedFiles,
       })
     }
   }
 
   const handleRatingClicked = () => {
-    analyticsCapture('rating_clicked')
+    analyticsCapture('rating_clicked', placeProps)
   }
 
   /*
@@ -162,20 +180,36 @@ function RouteComponent() {
    *
    */
 
+  if (!place) {
+    return <NotFoundComponent />
+  }
+
   return (
-    <Page className="flex flex-col gap-6 h-full relative overflow-hidden">
-      <img
-        src="/catcafe/background.webp"
-        className="absolute inset-0 w-full h-full object-cover -z-10"
-        decoding="async"
-        fetchPriority="low"
-        alt=""
-      />
+    <Page
+      className={cn(
+        'flex flex-col gap-6 h-full relative overflow-hidden',
+        place.colorScheme === 'dark' && 'dark',
+      )}
+      style={{ ['--primary' as string]: place.primaryColor }}
+    >
+      <div className="fixed inset-0 -z-10" aria-hidden>
+        <img
+          src={`/places/${placeId}/background.webp`}
+          className="absolute inset-0 w-full h-full object-cover"
+          decoding="async"
+          fetchPriority="low"
+          alt=""
+          style={{
+            opacity: place.backgroundOpacity,
+          }}
+        />
+        <div className="absolute inset-x-0 bottom-0 h-40 md:h-56 bg-gradient-to-t from-background via-background/40 to-transparent" />
+      </div>
       <div className="flex flex-col gap-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row gap-2 items-center">
             <img
-              src="/catcafe/logo-96.jpg"
+              src={`/places/${placeId}/logo-96.webp`}
               decoding="async"
               fetchPriority="high"
               width={96}
@@ -183,9 +217,13 @@ function RouteComponent() {
               className="size-12 rounded-full aspect-square object-cover"
             />
             <h1 className="text-xs text-left text-primary">
-              Klubokawiarnia
-              <br />
-              „Pod Kocim Ogonem"
+              {place.suffix && (
+                <>
+                  {place.suffix}
+                  <br />
+                </>
+              )}
+              „{place.name}"
             </h1>
           </div>
           <div
@@ -198,7 +236,7 @@ function RouteComponent() {
         </div>
         <div className="flex flex-row gap-2">
           <FaLocationDot className="size-5" />
-          <p>Bydgoszcz, ul. Długa 36</p>
+          <p>{place.location}</p>
         </div>
         <div className="flex flex-row items-center justify-between">
           <Rating
@@ -221,7 +259,7 @@ function RouteComponent() {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://www.instagram.com/podkocimogonem?igsi=MTZhdTdjbnI0dmQ2Ng=="
+                  href={place.instagramUrl}
                   onClick={handleInstagramButtonClicked}
                 />
               }
@@ -236,7 +274,7 @@ function RouteComponent() {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://www.facebook.com/profile.php?id=61589769376486"
+                  href={place.facebookUrl}
                   onClick={handleFacebookButtonClicked}
                 />
               }
@@ -255,17 +293,11 @@ function RouteComponent() {
         </div>
       </div>
       <Separator className="bg-primary -my-2 opacity-25" />
-      <CarouselGallery images={IMAGES} />
+      <CarouselGallery images={galleryImages} />
       <Separator className="bg-primary -my-2 opacity-25" />
       <div>
         <p className="text-sm">
-          Uchwyciłeś pyszne danie,{' '}
-          <span className="text-primary">uroczy moment z kotem</span> albo
-          świetną chwilę u nas? Podziel się zdjęciami! Pomóż innym odkryć nasz
-          klimat, a{' '}
-          <span className="text-primary">
-            najpiękniejsze kadry znajdziesz na naszym profilu!
-          </span>
+          <HighlightedText text={place.description} />
         </p>
       </div>
       <Separator className="bg-primary -my-2 opacity-25" />
@@ -280,7 +312,16 @@ function RouteComponent() {
           multiple
         />
         <Button
-          className="h-20 text-xl w-full"
+          className={cn(
+            'h-20 text-xl w-full',
+            placeId === 'oops' && 'border-4 shadow-[2px_2px_0_0_#000]',
+          )}
+          style={{
+            animation:
+              placeId === 'oops'
+                ? 'neon-pulse 2.5s ease-in-out infinite'
+                : undefined,
+          }}
           onClick={handleCaptureImageButtonClicked}
           disabled={selectedFiles.length >= 6}
         >
@@ -366,6 +407,8 @@ function RouteComponent() {
       <ThanksScreen
         visible={showThanksScreen}
         onVisibleChange={setShowThanksScreen}
+        backgroundUri={`/places/${placeId}/background.webp`}
+        backgroundOpacity={place.backgroundOpacity}
       />
     </Page>
   )

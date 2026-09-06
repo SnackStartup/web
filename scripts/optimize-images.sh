@@ -1,28 +1,55 @@
 #!/usr/bin/env bash
-# Generates optimized WebP/JPEG variants from originals in assets-raw/
-# Requires ImageMagick with libwebp (convert --version shows WEBP). Idempotent.
+# Optimizes all images for a place: assets-raw/places/<slug>/ -> public/places/<slug>/
+# Usage: optimize-images.sh [slug ...]   (no args = all places)
 set -euo pipefail
 
-RAW="assets-raw"
-OUT="public/catcafe"
+RAW="assets-raw/places"
+OUT="public/places"
 
-mkdir -p "$OUT"
+process_place() {
+  local slug="$1"
+  local src="$RAW/$slug"
+  local dst="$OUT/$slug"
 
-# Carousel: 480px tile + 960px lightbox (square center-crop, matches aspect-square grid)
-for n in 6 7 8 9 10 11 12 13; do
-  convert "$RAW/$n.jpg" -auto-orient \
-    -thumbnail 480x480 -gravity center -extent 480x480 \
-    -quality 72 -strip "$OUT/tile-$n.webp"
-  convert "$RAW/$n.jpg" -auto-orient \
-    -thumbnail 960x960 -gravity center -extent 960x960 \
-    -quality 78 -strip "$OUT/full-$n.webp"
-done
+  [ -d "$src" ] || { echo "error: $src not found" >&2; exit 1; }
+  mkdir -p "$dst"
 
-# Decorative dimmed backdrop -> small + low quality is invisible
-convert "$RAW/background.png" -auto-orient -strip -quality 55 "$OUT/background.webp"
+  # Gallery: every file except background/logo/icon -> tile-STEM.webp + full-STEM.webp
+  local f stem
+  while IFS= read -r f; do
+    stem="${f##*/}"; stem="${stem%%.*}"
+    convert "$f" -auto-orient \
+      -thumbnail 480x480^ -gravity center -extent 480x480 +repage \
+      -quality 72 -strip "$dst/tile-$stem.webp"
+    convert "$f" -auto-orient \
+      -thumbnail 960x960^ -gravity center -extent 960x960 +repage \
+      -quality 78 -strip "$dst/full-$stem.webp"
+  done < <(find "$src" -maxdepth 1 -type f \
+    ! -name 'background.*' ! -name 'logo.*' ! -name 'icon.*')
 
-# Logo displayed at 48px -> 96px source is plenty
-convert "$RAW/logo.jpg" -auto-orient -resize 96x96 -strip -quality 80 "$OUT/logo-96.jpg"
+  # Background (any extension) -> background.webp
+  f="$(find "$src" -maxdepth 1 -type f -name 'background.*' -print -quit || true)"
+  if [ -n "$f" ]; then
+    convert "$f" -auto-orient -strip -quality 55 "$dst/background.webp"
+  fi
 
-# Favicon / in-page icon (24-56px) -> 96px PNG
-convert "$RAW/icon.png" -resize 96x96 -strip -define png:compression-level=9 "public/icon-96.png"
+  # Logo (any extension) -> logo-96.webp  (matches /places/<id>/logo-96.webp in the route)
+  f="$(find "$src" -maxdepth 1 -type f -name 'logo.*' -print -quit || true)"
+  if [ -n "$f" ]; then
+    convert "$f" -auto-orient -resize 96x96 -strip -quality 80 "$dst/logo-96.webp"
+  fi
+
+  # App icon is global — only place "1" owns it
+  f="$(find "$src" -maxdepth 1 -type f -name 'icon.*' -print -quit || true)"
+  if [ -n "$f" ] && [ "$slug" = "1" ]; then
+    convert "$f" -resize 96x96 -strip -define png:compression-level=9 "public/icon-96.png"
+  fi
+
+  echo "ok: $slug -> $dst"
+}
+
+if [ "$#" -eq 0 ]; then
+  for d in "$RAW"/*/; do process_place "$(basename "$d")"; done
+else
+  for slug in "$@"; do process_place "$slug"; done
+fi

@@ -6,9 +6,16 @@ import './ThanksScreen.css'
 type Props = {
   visible: boolean
   onVisibleChange: (visible: boolean) => void
+  backgroundUri: string
+  backgroundOpacity?: string
 }
 
-export const ThanksScreen: React.FC<Props> = ({ visible, onVisibleChange }) => {
+export const ThanksScreen: React.FC<Props> = ({
+  visible,
+  onVisibleChange,
+  backgroundUri,
+  backgroundOpacity,
+}) => {
   useEffect(() => {
     if (!visible) return
     const timeout = setTimeout(() => {
@@ -32,16 +39,19 @@ export const ThanksScreen: React.FC<Props> = ({ visible, onVisibleChange }) => {
     <div
       style={{ touchAction: 'none' }}
       className={`
-          absolute inset-0 bg-white overflow-hidden
-          transition-opacity duration-500
-          pointer-events-none
-          ${visible ? 'opacity-100' : 'opacity-0'}
-        `}
+        fixed inset-0 z-50 bg-background overflow-hidden
+        transition-opacity duration-500
+        pointer-events-none
+        ${visible ? 'opacity-100' : 'opacity-0'}
+      `}
     >
       <img
-        src="/catcafe/background.webp"
+        src={backgroundUri}
         className="absolute inset-0 w-full h-full object-cover z-0"
         alt=""
+        style={{
+          opacity: backgroundOpacity,
+        }}
       />
       <div className="relative z-10 flex flex-col items-center justify-center gap-2 h-full">
         {visible && (

@@ -14,7 +14,13 @@ export const useApiUploadPhotosMutation = () => {
 
   const mutation = useMutation({
     retry: 0, // don't re-run the whole batch automatically
-    mutationFn: async ({ files }: { files: File[] }) => {
+    mutationFn: async ({
+      files,
+      placeId,
+    }: {
+      files: File[]
+      placeId: string
+    }) => {
       analyticsCapture('try_upload_photos', { count: files.length })
 
       const compressed = await Promise.all(files.map(compressImage))
@@ -32,7 +38,7 @@ export const useApiUploadPhotosMutation = () => {
           await apiClient.post('/upload_photos', formData, {
             timeout: 120000,
             'axios-retry': { retries: 1 }, // override client.ts's global 3x retry
-            headers: { 'X-Upload-Id': randomUploadId() },
+            headers: { 'X-Upload-Id': randomUploadId(), 'X-Place-Id': placeId },
             onUploadProgress: (e) => {
               if (!e.total) return
               const pct = Math.round((e.loaded / e.total) * 100)
