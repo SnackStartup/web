@@ -154,3 +154,26 @@ body,
       0 0 18px #41e2ff;
   }
 }
+
+@keyframes neon-text-pulse {
+  0%,
+  100% {
+    color: #ff6ec7;
+    text-shadow:
+      0 0 3px rgba(255, 110, 199, 0.9),
+      0 0 6px rgba(255, 110, 199, 0.7),
+      0 0 12px rgba(255, 110, 199, 0.5);
+  }
+  50% {
+    color: #41e2ff;
+    text-shadow:
+      0 0 3px rgba(65, 226, 255, 0.9),
+      0 0 6px rgba(65, 226, 255, 0.7),
+      0 0 12px rgba(65, 226, 255, 0.5);
+  }
+}
+
+.outline-logo {
+  filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff)
+    drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff);
+}

@@ -7,7 +7,7 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
-import type { ChangeEventHandler } from 'react'
+import type { ChangeEventHandler, CSSProperties } from 'react'
 import {
   FaLocationDot,
   FaCamera,
@@ -184,15 +184,25 @@ function RouteComponent() {
     return <NotFoundComponent />
   }
 
+  const oopsNeonStyles: CSSProperties =
+    placeId === 'oops'
+      ? {
+          animation: 'neon-pulse 2.5s ease-in-out infinite',
+          borderStyle: 'var(--tw-border-style)',
+          borderWidth: '2px',
+          boxShadow: '2px 2px 0 0 var(--tw-shadow-color, #000)',
+        }
+      : {}
+
   return (
     <Page
       className={cn(
-        'flex flex-col gap-6 h-full relative overflow-hidden',
+        'flex flex-col gap-6 relative min-h-screen overflow-hidden',
         place.colorScheme === 'dark' && 'dark',
       )}
       style={{ ['--primary' as string]: place.primaryColor }}
     >
-      <div className="fixed inset-0 -z-10" aria-hidden>
+      <div className="absolute inset-0 -z-10" aria-hidden>
         <img
           src={`/places/${placeId}/background.webp`}
           className="absolute inset-0 w-full h-full object-cover"
@@ -231,7 +241,11 @@ function RouteComponent() {
             onClick={() => navigate({ to: '/' })}
           >
             <h1 className="font-bold text-xl">Stolik</h1>
-            <img src="/icon-96.png" decoding="async" className="size-10" />
+            <img
+              src="/icon-96.png"
+              decoding="async"
+              className="size-10 outline-logo"
+            />
           </div>
         </div>
         <div className="flex flex-row gap-2">
@@ -292,15 +306,24 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <Separator className="bg-primary -my-2 opacity-25" />
+      <Separator
+        className="bg-primary -my-2 opacity-25"
+        style={oopsNeonStyles}
+      />
       <CarouselGallery images={galleryImages} />
-      <Separator className="bg-primary -my-2 opacity-25" />
+      <Separator
+        className="bg-primary -my-2 opacity-25"
+        style={oopsNeonStyles}
+      />
       <div>
         <p className="text-sm">
-          <HighlightedText text={place.description} />
+          <HighlightedText text={place.description} neon={placeId === 'oops'} />
         </p>
       </div>
-      <Separator className="bg-primary -my-2 opacity-25" />
+      <Separator
+        className="bg-primary -my-2 opacity-25"
+        style={oopsNeonStyles}
+      />
       <div className="flex flex-col gap-2">
         <input
           ref={imageCaptureInputRef}
@@ -312,16 +335,8 @@ function RouteComponent() {
           multiple
         />
         <Button
-          className={cn(
-            'h-20 text-xl w-full',
-            placeId === 'oops' && 'border-4 shadow-[2px_2px_0_0_#000]',
-          )}
-          style={{
-            animation:
-              placeId === 'oops'
-                ? 'neon-pulse 2.5s ease-in-out infinite'
-                : undefined,
-          }}
+          className="h-20 text-xl w-full"
+          style={{ ...oopsNeonStyles, borderWidth: '4px' }}
           onClick={handleCaptureImageButtonClicked}
           disabled={selectedFiles.length >= 6}
         >
