@@ -11,6 +11,7 @@ const randomUploadId = () =>
 
 export const useApiUploadPhotosMutation = () => {
   const progressRef = useRef<Map<File, number>>(new Map())
+  const compressedFilesRef = useRef<File[]>([])
 
   const mutation = useMutation({
     retry: 0, // don't re-run the whole batch automatically
@@ -24,6 +25,7 @@ export const useApiUploadPhotosMutation = () => {
       analyticsCapture('try_upload_photos', { count: files.length })
 
       const compressed = await Promise.all(files.map(compressImage))
+      compressedFilesRef.current = compressed
       progressRef.current = new Map()
       files.forEach((f) => progressRef.current.set(f, 0))
 
@@ -61,6 +63,7 @@ export const useApiUploadPhotosMutation = () => {
   })
 
   const getProgress = (file: File) => progressRef.current.get(file) ?? 0
+  const getCompressedFiles = () => compressedFilesRef.current
 
-  return { ...mutation, getProgress }
+  return { ...mutation, getProgress, getCompressedFiles }
 }

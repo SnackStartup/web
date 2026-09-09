@@ -10,13 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PayedRouteImport } from './routes/payed'
 import { Route as PolitykaPrywatnosciRouteImport } from './routes/polityka-prywatnosci'
 import { Route as RegulaminRouteImport } from './routes/regulamin'
+import { Route as PayIdRouteImport } from './routes/pay.$id'
 import { Route as ScannedIdRouteImport } from './routes/scanned.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayedRoute = PayedRouteImport.update({
+  id: '/payed',
+  path: '/payed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PolitykaPrywatnosciRoute = PolitykaPrywatnosciRouteImport.update({
@@ -29,6 +36,11 @@ const RegulaminRoute = RegulaminRouteImport.update({
   path: '/regulamin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PayIdRoute = PayIdRouteImport.update({
+  id: '/pay/$id',
+  path: '/pay/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScannedIdRoute = ScannedIdRouteImport.update({
   id: '/scanned/$id',
   path: '/scanned/$id',
@@ -37,35 +49,62 @@ const ScannedIdRoute = ScannedIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/payed': typeof PayedRoute
   '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
   '/regulamin': typeof RegulaminRoute
+  '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/payed': typeof PayedRoute
   '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
   '/regulamin': typeof RegulaminRoute
+  '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/payed': typeof PayedRoute
   '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
   '/regulamin': typeof RegulaminRoute
+  '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/polityka-prywatnosci' | '/regulamin' | '/scanned/$id'
+  fullPaths:
+    | '/'
+    | '/payed'
+    | '/polityka-prywatnosci'
+    | '/regulamin'
+    | '/pay/$id'
+    | '/scanned/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/polityka-prywatnosci' | '/regulamin' | '/scanned/$id'
-  id: '__root__' | '/' | '/polityka-prywatnosci' | '/regulamin' | '/scanned/$id'
+  to:
+    | '/'
+    | '/payed'
+    | '/polityka-prywatnosci'
+    | '/regulamin'
+    | '/pay/$id'
+    | '/scanned/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/payed'
+    | '/polityka-prywatnosci'
+    | '/regulamin'
+    | '/pay/$id'
+    | '/scanned/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PayedRoute: typeof PayedRoute
   PolitykaPrywatnosciRoute: typeof PolitykaPrywatnosciRoute
   RegulaminRoute: typeof RegulaminRoute
+  PayIdRoute: typeof PayIdRoute
   ScannedIdRoute: typeof ScannedIdRoute
 }
 
@@ -76,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payed': {
+      id: '/payed'
+      path: '/payed'
+      fullPath: '/payed'
+      preLoaderRoute: typeof PayedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/polityka-prywatnosci': {
@@ -92,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegulaminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pay/$id': {
+      id: '/pay/$id'
+      path: '/pay/$id'
+      fullPath: '/pay/$id'
+      preLoaderRoute: typeof PayIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scanned/$id': {
       id: '/scanned/$id'
       path: '/scanned/$id'
@@ -104,8 +157,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PayedRoute: PayedRoute,
   PolitykaPrywatnosciRoute: PolitykaPrywatnosciRoute,
   RegulaminRoute: RegulaminRoute,
+  PayIdRoute: PayIdRoute,
   ScannedIdRoute: ScannedIdRoute,
 }
 export const routeTree = rootRouteImport

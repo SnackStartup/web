@@ -24,7 +24,7 @@ export const HomeHero: React.FC = () => {
 
       <Button
         size="lg"
-        className="p-6 w-2/3"
+        className="w-2/3 px-8 sm:w-auto"
         render={<a href="#jak-to-dziala" />}
       >
         <ArrowDownIcon />

@@ -41,3 +41,11 @@ npm run dev
 ```
 ~/Android/Sdk/emulator/emulator -avd Pixel_10 -no-snapshot-load
 ```
+
+```
+ngrok http https://localhost:3000 --url https://rework-regain-prong.ngrok-free.dev --traffic-policy-file ngrok/policy.yaml
+```
+
+```
+NODE_EXTRA_CA_CERTS=\"$(pwd)/public/rootCA.pem\" vite build --mode development && vite preview --host 0.0.0.0
+```

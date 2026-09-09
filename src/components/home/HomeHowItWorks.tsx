@@ -38,7 +38,7 @@ export const HomeHowItWorks: React.FC = () => {
         <h2 className="text-3xl font-bold md:text-4xl">Jak to działa</h2>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {steps.map((step, index) => (
           <Card key={index} className="h-full relative">
             <step.icon className="absolute top-6 right-5 size-6 text-muted-foreground/40" />

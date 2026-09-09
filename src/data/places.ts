@@ -35,7 +35,7 @@ export const places = {
     facebookUrl: 'https://www.facebook.com/zapalkacoffee',
     description: `
       Pokaż, co u nas dzisiaj próbujesz!
-      Wrzuć fotkę ciasta lub kawy – *najlepsze kadry udostępnimy na naszym profilu!*.
+      Wrzuć fotkę ciasta lub kawy – *najlepsze kadry udostępnimy na naszym profilu!*
     `,
     galleryCount: 10,
     primaryColor: '#a57b62',
@@ -51,7 +51,7 @@ export const places = {
       Jak tam dzisiejszy wieczór w OOPS?
       Wrzuć fotkę drinka lub ekipy – *najlepsze ujęcia udostępnimy na naszym profilu!*
     `,
-    galleryCount: 6,
+    galleryCount: 8,
     primaryColor: '#805ae5',
     backgroundOpacity: '30%',
     colorScheme: 'dark',

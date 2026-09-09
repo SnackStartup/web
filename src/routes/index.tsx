@@ -10,13 +10,15 @@ export const Route = createFileRoute('/')({ component: App })
 function App() {
   return (
     <Page>
-      <HomeHero />
-      <div className="my-20" />
-      <HomeHowItWorks />
-      <div className="my-20" />
-      <HomeFeatures />
-      <div className="my-20" />
-      <HomeContact />
+      <div className="mx-auto w-full max-w-6xl">
+        <HomeHero />
+        <div className="my-20" />
+        <HomeHowItWorks />
+        <div className="my-20" />
+        <HomeFeatures />
+        <div className="my-20" />
+        <HomeContact />
+      </div>
     </Page>
   )
 }

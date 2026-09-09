@@ -43,8 +43,13 @@ function RouteComponent() {
   const navigate = useNavigate()
   const imageCaptureInputRef = useRef<HTMLInputElement>(null)
   const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
+  const [shareFiles, setShareFiles] = useState<File[]>([])
+  const clientCycleLastTapRef = useRef(0)
+  const clientCycleTapCountRef = useRef(0)
   const canSharePics =
     navigator?.canShare && navigator.canShare({ files: selectedFiles })
+  const canShareFiles =
+    navigator?.canShare && navigator.canShare({ files: shareFiles })
   const isUploading = apiUploadPhotosMutation.isPending
   const [uploadFailed, setUploadFailed] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
@@ -122,6 +127,7 @@ function RouteComponent() {
       {
         onSuccess() {
           setUploadProgress(new Map())
+          setShareFiles(apiUploadPhotosMutation.getCompressedFiles())
           setSelectedFiles([])
           setShowThanksScreen(true)
         },
@@ -171,8 +177,44 @@ function RouteComponent() {
     }
   }
 
+  const handleThanksInstagramShare = async () => {
+    invariant(place)
+    analyticsCapture('thanks_instagram_share', placeProps)
+    try {
+      await navigator.share({
+        title: `Stolik — ${place.name}`,
+        text: 'Zobacz zdjęcia dań i podziel się swoim talerzem!',
+        files: shareFiles,
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleThanksVisibleChange = (visible: boolean) => {
+    setShowThanksScreen(visible)
+    if (!visible) setShareFiles([])
+  }
+
   const handleRatingClicked = () => {
     analyticsCapture('rating_clicked', placeProps)
+  }
+
+  const handleClientLogoClicked = () => {
+    if (isUploading) return
+    const now = Date.now()
+    if (now - clientCycleLastTapRef.current > 600) {
+      clientCycleTapCountRef.current = 0
+    }
+    clientCycleLastTapRef.current = now
+    clientCycleTapCountRef.current += 1
+    if (clientCycleTapCountRef.current < 3) return
+
+    clientCycleTapCountRef.current = 0
+    const ids = Object.keys(places)
+    const currentIndex = ids.indexOf(placeId)
+    const nextId = ids[(currentIndex + 1) % ids.length]
+    navigate({ to: '/scanned/$id', params: { id: nextId } })
   }
 
   /*
@@ -198,12 +240,13 @@ function RouteComponent() {
   return (
     <Page
       className={cn(
-        'flex flex-col gap-6 relative min-h-screen overflow-hidden',
+        'relative flex flex-col gap-6 overflow-hidden min-h-screen',
+        'mx-auto w-full max-w-xl lg:max-w-2xl px-6 py-6',
         place.colorScheme === 'dark' && 'dark',
       )}
       style={{ ['--primary' as string]: place.primaryColor }}
     >
-      <div className="absolute inset-0 -z-10" aria-hidden>
+      <div className="fixed inset-0 -z-10" aria-hidden>
         <img
           src={`/places/${placeId}/background.webp`}
           className="absolute inset-0 w-full h-full object-cover"
@@ -225,6 +268,7 @@ function RouteComponent() {
               fetchPriority="high"
               width={96}
               height={96}
+              onClick={handleClientLogoClicked}
               className="size-12 rounded-full aspect-square object-cover"
             />
             <h1
@@ -339,6 +383,10 @@ function RouteComponent() {
         className="bg-primary -my-2 opacity-25"
         style={oopsNeonStyles}
       />
+      <p className="text-xs text-neutral-400 text-center">
+        Podkręć suwak doświetlania w kamerze, to łatwy sposób na jeszcze
+        piękniejsze zdjęcia!
+      </p>
       <div className="flex flex-col gap-2">
         <input
           ref={imageCaptureInputRef}
@@ -441,10 +489,13 @@ function RouteComponent() {
       </p>
       <ThanksScreen
         visible={showThanksScreen}
-        onVisibleChange={setShowThanksScreen}
+        onVisibleChange={handleThanksVisibleChange}
         backgroundUri={`/places/${placeId}/background.webp`}
         backgroundOpacity={place.backgroundOpacity}
         neon={placeId === 'oops'}
+        shareFiles={shareFiles}
+        canShareFiles={canShareFiles}
+        onInstagramShare={handleThanksInstagramShare}
       />
     </Page>
   )

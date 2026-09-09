@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -9,7 +9,11 @@ import { nitro } from 'nitro/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { existsSync, readFileSync } from 'node:fs'
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const ngrokHost = env.HMR_HOST
+  const backendUrl = env.VITE_API_URL
+
   const keyPath = 'certs/dev-key.pem'
   const certPath = 'certs/dev-cert.pem'
   const useHttps =
@@ -26,7 +30,11 @@ export default defineConfig(({ command }) => {
         },
       }),
       viteReact(),
-      nitro(),
+      nitro({
+        ...(mode === 'development'
+          ? { routeRules: { '/api/**': { proxy: `${backendUrl}/**` } } }
+          : {}),
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         manifest: {
@@ -62,10 +70,24 @@ export default defineConfig(({ command }) => {
     },
     server: useHttps
       ? {
+          ...(mode === 'development'
+            ? {
+                proxy: {
+                  '/api': {
+                    target: backendUrl,
+                    changeOrigin: true,
+                    secure: false, // mkcert self-signed (dev only)
+                  },
+                },
+              }
+            : {}),
           https: {
             key: readFileSync(keyPath),
             cert: readFileSync(certPath),
           },
+          ...(ngrokHost
+            ? { hmr: { host: ngrokHost, protocol: 'wss', clientPort: 443 } }
+            : {}),
         }
       : undefined,
   }
