@@ -1,12 +1,11 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { CheckCircle2Icon, ShieldCheckIcon } from 'lucide-react'
 import { useEffect } from 'react'
-import { useApiRetrieveCheckoutSessionQuery } from '#/api/useApiRetrieveCheckoutSessionQuery'
-import { Page } from '#/components/Page'
+import { useApiPaymentsRetrieveCheckoutSessionQuery } from '#/api/payments/use-api-payments-retrieve-checkout-session-query'
+import { Page } from '#/components/page'
 import { Spinner } from '#/components/ui/spinner'
 import { Button } from '#/components/ui/button'
-import { places } from '#/data/places'
-import type { Place } from '#/data/places'
+import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
 
 export const Route = createFileRoute('/payed')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -18,17 +17,17 @@ export const Route = createFileRoute('/payed')({
 function RouteComponent() {
   const { session_id } = Route.useSearch()
   const navigate = useNavigate()
-  const checkoutSessionQuery = useApiRetrieveCheckoutSessionQuery(session_id)
-  const placeId = checkoutSessionQuery.data?.place_id
-  const place = placeId
-    ? (places[placeId as keyof typeof places] as Place | undefined)
-    : undefined
+  const apiCheckoutSessionQuery =
+    useApiPaymentsRetrieveCheckoutSessionQuery(session_id)
+  const placeId = apiCheckoutSessionQuery.data?.place_id ?? ''
+  const placeQuery = useApiPlaceQuery(placeId)
+  const place = placeQuery.data
 
   useEffect(() => {
     if (!session_id) navigate({ to: '/' })
   }, [session_id, navigate])
 
-  if (checkoutSessionQuery.isPending) {
+  if (apiCheckoutSessionQuery.isPending) {
     return (
       <Page className="flex min-h-screen items-center justify-center">
         <Spinner className="size-12" />
@@ -36,7 +35,7 @@ function RouteComponent() {
     )
   }
 
-  if (checkoutSessionQuery.isError) {
+  if (apiCheckoutSessionQuery.isError) {
     return (
       <Page className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-destructive">Nie udało się potwierdzić płatności.</p>

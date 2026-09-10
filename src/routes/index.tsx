@@ -1,8 +1,8 @@
-import { HomeContact } from '#/components/home/HomeContact'
-import { HomeFeatures } from '#/components/home/HomeFeatures'
-import { HomeHero } from '#/components/home/HomeHero'
-import { HomeHowItWorks } from '#/components/home/HomeHowItWorks'
-import { Page } from '#/components/Page'
+import { HomeContact } from '#/components/home/home-contact'
+import { HomeFeatures } from '#/components/home/home-features'
+import { HomeHero } from '#/components/home/home-hero'
+import { HomeHowItWorks } from '#/components/home/home-how-it-works'
+import { Page } from '#/components/page'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({ component: App })

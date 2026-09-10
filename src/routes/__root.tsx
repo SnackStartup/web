@@ -1,13 +1,16 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { Footer } from '#/components/Footer'
+import { Footer } from '#/components/footer'
 import { Analytics } from '@vercel/analytics/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import '../styles.css'
 import { useEffect } from 'react'
 import { initAnalytics } from '#/lib/analytics'
+import { ErrorComponent } from '#/components/error-component'
+import { NotFoundComponent } from '#/components/not-found-component'
+import { Header } from '#/components/header'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -25,6 +28,8 @@ export const Route = createRootRoute({
     ],
     links: [{ rel: 'icon', href: '/icon-96.png' }],
   }),
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
   shellComponent: RootDocument,
 })
 
@@ -32,6 +37,7 @@ const queryClient = new QueryClient()
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const idle = window.requestIdleCallback ?? ((cb) => setTimeout(cb, 2000))
     idle(() => initAnalytics())
   }, [])
@@ -43,6 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] min-h-screen flex flex-col">
         <QueryClientProvider client={queryClient}>
+          <Header />
           <div className="flex-1 flex flex-col">{children}</div>
           <Footer className="mt-16" />
           {import.meta.env.PROD && <Analytics />}

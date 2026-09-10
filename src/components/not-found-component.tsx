@@ -1,4 +1,4 @@
-import { Page } from './Page'
+import { Page } from './page'
 import { LuCircleAlert } from 'react-icons/lu'
 import { Button } from './ui/button'
 import { Link, useNavigate } from '@tanstack/react-router'

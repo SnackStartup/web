@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PayedRouteImport } from './routes/payed'
-import { Route as PolitykaPrywatnosciRouteImport } from './routes/polityka-prywatnosci'
-import { Route as RegulaminRouteImport } from './routes/regulamin'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as TosRouteImport } from './routes/tos'
 import { Route as PayIdRouteImport } from './routes/pay.$id'
 import { Route as ScannedIdRouteImport } from './routes/scanned.$id'
 
@@ -26,14 +26,14 @@ const PayedRoute = PayedRouteImport.update({
   path: '/payed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PolitykaPrywatnosciRoute = PolitykaPrywatnosciRouteImport.update({
-  id: '/polityka-prywatnosci',
-  path: '/polityka-prywatnosci',
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RegulaminRoute = RegulaminRouteImport.update({
-  id: '/regulamin',
-  path: '/regulamin',
+const TosRoute = TosRouteImport.update({
+  id: '/tos',
+  path: '/tos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PayIdRoute = PayIdRouteImport.update({
@@ -50,16 +50,16 @@ const ScannedIdRoute = ScannedIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/payed': typeof PayedRoute
-  '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
-  '/regulamin': typeof RegulaminRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/tos': typeof TosRoute
   '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/payed': typeof PayedRoute
-  '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
-  '/regulamin': typeof RegulaminRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/tos': typeof TosRoute
   '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
@@ -67,34 +67,23 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/payed': typeof PayedRoute
-  '/polityka-prywatnosci': typeof PolitykaPrywatnosciRoute
-  '/regulamin': typeof RegulaminRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/tos': typeof TosRoute
   '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/payed'
-    | '/polityka-prywatnosci'
-    | '/regulamin'
-    | '/pay/$id'
-    | '/scanned/$id'
+    '/' | '/payed' | '/privacy-policy' | '/tos' | '/pay/$id' | '/scanned/$id'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/payed'
-    | '/polityka-prywatnosci'
-    | '/regulamin'
-    | '/pay/$id'
-    | '/scanned/$id'
+  to: '/' | '/payed' | '/privacy-policy' | '/tos' | '/pay/$id' | '/scanned/$id'
   id:
     | '__root__'
     | '/'
     | '/payed'
-    | '/polityka-prywatnosci'
-    | '/regulamin'
+    | '/privacy-policy'
+    | '/tos'
     | '/pay/$id'
     | '/scanned/$id'
   fileRoutesById: FileRoutesById
@@ -102,8 +91,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PayedRoute: typeof PayedRoute
-  PolitykaPrywatnosciRoute: typeof PolitykaPrywatnosciRoute
-  RegulaminRoute: typeof RegulaminRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  TosRoute: typeof TosRoute
   PayIdRoute: typeof PayIdRoute
   ScannedIdRoute: typeof ScannedIdRoute
 }
@@ -124,18 +113,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/polityka-prywatnosci': {
-      id: '/polityka-prywatnosci'
-      path: '/polityka-prywatnosci'
-      fullPath: '/polityka-prywatnosci'
-      preLoaderRoute: typeof PolitykaPrywatnosciRouteImport
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/regulamin': {
-      id: '/regulamin'
-      path: '/regulamin'
-      fullPath: '/regulamin'
-      preLoaderRoute: typeof RegulaminRouteImport
+    '/tos': {
+      id: '/tos'
+      path: '/tos'
+      fullPath: '/tos'
+      preLoaderRoute: typeof TosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pay/$id': {
@@ -158,8 +147,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PayedRoute: PayedRoute,
-  PolitykaPrywatnosciRoute: PolitykaPrywatnosciRoute,
-  RegulaminRoute: RegulaminRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  TosRoute: TosRoute,
   PayIdRoute: PayIdRoute,
   ScannedIdRoute: ScannedIdRoute,
 }

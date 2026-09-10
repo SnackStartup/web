@@ -1,4 +1,4 @@
-import { Page } from '#/components/Page'
+import { Page } from '#/components/page'
 import { Button } from '#/components/ui/button'
 import {
   createFileRoute,
@@ -18,19 +18,20 @@ import {
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
 import { Share2Icon, StarIcon } from 'lucide-react'
-import { useApiUploadPhotosMutation } from '#/api/useApiUploadPhotosMutation'
-import { ThanksScreen } from '#/components/ThanksScreen'
+import { useApiPhotosUploadMutation } from '#/api/photos/use-api-photos-upload-mutation'
+import { ThanksScreen } from '#/components/thanks-screen'
 import { CarouselGallery } from '#/components/carousel-gallery'
 import type { GalleryImage } from '#/components/carousel-gallery'
 import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import { analyticsCapture } from '#/lib/analytics'
-import { places } from '#/data/places'
-import type { Place } from '#/data/places'
 import { HighlightedText } from '#/components/highlighted-text'
-import { NotFoundComponent } from '#/components/NotFoundComponent'
+import { NotFoundComponent } from '#/components/not-found-component'
 import invariant from 'tiny-invariant'
 import { cn } from '#/lib/utils'
+import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
+import { useApiPlacesQuery } from '#/api/places/use-api-places-query'
+import { useApiGalleryManifestQuery } from '#/api/places/use-api-places-gallery-manifest'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -39,7 +40,7 @@ export const Route = createFileRoute('/scanned/$id')({
 function RouteComponent() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const inputFileRef = useRef<HTMLInputElement>(null)
-  const apiUploadPhotosMutation = useApiUploadPhotosMutation()
+  const apiPhotosUploadMutation = useApiPhotosUploadMutation()
   const navigate = useNavigate()
   const imageCaptureInputRef = useRef<HTMLInputElement>(null)
   const [showThanksScreen, setShowThanksScreen] = useState<boolean>(false)
@@ -47,23 +48,27 @@ function RouteComponent() {
   const clientCycleLastTapRef = useRef(0)
   const clientCycleTapCountRef = useRef(0)
   const canSharePics =
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     navigator?.canShare && navigator.canShare({ files: selectedFiles })
   const canShareFiles =
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     navigator?.canShare && navigator.canShare({ files: shareFiles })
-  const isUploading = apiUploadPhotosMutation.isPending
+  const isUploading = apiPhotosUploadMutation.isPending
   const [uploadFailed, setUploadFailed] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
     new Map(),
   )
   const isUploadingDisabled = selectedFiles.length === 0 || isUploading
   const { id: placeId } = Route.useParams()
-  const place = places[placeId as keyof typeof places] as Place | undefined
+  const placeQuery = useApiPlaceQuery(placeId)
+  const placesQuery = useApiPlacesQuery()
+  const place = placeQuery.data
   const placeProps = { place_id: placeId, place_name: place?.name }
-  const galleryImages: GalleryImage[] = [
-    ...Array(place?.galleryCount ?? 0).keys(),
-  ].map((n) => ({
-    tile: `/places/${placeId}/tile-${n + 1}.webp`,
-    full: `/places/${placeId}/full-${n + 1}.webp`,
+  const galleryManifestQuery = useApiGalleryManifestQuery()
+  const galleryCount = galleryManifestQuery.data?.[placeId] ?? 0
+  const galleryImages = Array.from({ length: galleryCount }, (_, i) => ({
+    tile: `/places/${placeId}/tile-${i + 1}.webp`,
+    full: `/places/${placeId}/full-${i + 1}.webp`,
   }))
 
   /*
@@ -79,7 +84,7 @@ function RouteComponent() {
         const next = new Map(prev)
         let changed = false
         for (const f of prev.keys()) {
-          const p = apiUploadPhotosMutation.getProgress(f)
+          const p = apiPhotosUploadMutation.getProgress(f)
           if (p !== prev.get(f)) {
             next.set(f, p)
             changed = true
@@ -89,13 +94,13 @@ function RouteComponent() {
       })
     }, 100)
     return () => clearInterval(id)
-  }, [isUploading, apiUploadPhotosMutation.getProgress])
+  }, [isUploading, apiPhotosUploadMutation.getProgress])
 
   useLayoutEffect(() => {
-    const isDark = place?.colorScheme === 'dark'
+    const isDark = place?.color_scheme === 'dark'
     document.documentElement.classList.toggle('dark', isDark)
     return () => document.documentElement.classList.remove('dark')
-  }, [place?.colorScheme])
+  }, [place?.color_scheme])
 
   /*
    *
@@ -122,12 +127,12 @@ function RouteComponent() {
   const handleUploadButtonClicked = () => {
     setUploadFailed(false)
     setUploadProgress(new Map(selectedFiles.map((f) => [f, 0])))
-    apiUploadPhotosMutation.mutate(
+    apiPhotosUploadMutation.mutate(
       { files: selectedFiles, placeId },
       {
         onSuccess() {
           setUploadProgress(new Map())
-          setShareFiles(apiUploadPhotosMutation.getCompressedFiles())
+          setShareFiles(apiPhotosUploadMutation.getCompressedFiles())
           setSelectedFiles([])
           setShowThanksScreen(true)
         },
@@ -211,10 +216,13 @@ function RouteComponent() {
     if (clientCycleTapCountRef.current < 3) return
 
     clientCycleTapCountRef.current = 0
-    const ids = Object.keys(places)
+    const ids = placesQuery.data?.map((p) => p.id) ?? []
+    if (ids.length === 0) return
     const currentIndex = ids.indexOf(placeId)
-    const nextId = ids[(currentIndex + 1) % ids.length]
-    navigate({ to: '/scanned/$id', params: { id: nextId } })
+    navigate({
+      to: '/scanned/$id',
+      params: { id: ids[(currentIndex + 1) % ids.length] },
+    })
   }
 
   /*
@@ -223,28 +231,34 @@ function RouteComponent() {
    *
    */
 
-  if (!place) {
+  if (placeQuery.isPending) {
+    return (
+      <Page className="flex min-h-screen items-center justify-center">
+        <Spinner className="size-12" />
+      </Page>
+    )
+  }
+  if (placeQuery.isError || !place) {
     return <NotFoundComponent />
   }
 
-  const oopsNeonStyles: CSSProperties =
-    placeId === 'oops'
-      ? {
-          animation: 'neon-pulse 2.5s ease-in-out infinite',
-          borderStyle: 'var(--tw-border-style)',
-          borderWidth: '2px',
-          boxShadow: '2px 2px 0 0 var(--tw-shadow-color, #000)',
-        }
-      : {}
+  const neonStyles: CSSProperties = place.neon
+    ? {
+        animation: 'neon-pulse 2.5s ease-in-out infinite',
+        borderStyle: 'var(--tw-border-style)',
+        borderWidth: '2px',
+        boxShadow: '2px 2px 0 0 var(--tw-shadow-color, #000)',
+      }
+    : {}
 
   return (
     <Page
       className={cn(
         'relative flex flex-col gap-6 overflow-hidden min-h-screen',
         'mx-auto w-full max-w-xl lg:max-w-2xl px-6 py-6',
-        place.colorScheme === 'dark' && 'dark',
+        place.color_scheme === 'dark' && 'dark',
       )}
-      style={{ ['--primary' as string]: place.primaryColor }}
+      style={{ ['--primary' as string]: place.primary_color }}
     >
       <div className="fixed inset-0 -z-10" aria-hidden>
         <img
@@ -254,7 +268,7 @@ function RouteComponent() {
           fetchPriority="low"
           alt=""
           style={{
-            opacity: place.backgroundOpacity,
+            opacity: place.background_opacity,
           }}
         />
         <div className="absolute inset-x-0 bottom-0 h-40 md:h-56 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -274,7 +288,7 @@ function RouteComponent() {
             <h1
               className="text-xs text-left text-primary font-semibold"
               style={
-                placeId === 'oops'
+                place.neon
                   ? { animation: 'neon-text-pulse 2.5s ease-in-out infinite' }
                   : {}
               }
@@ -298,7 +312,7 @@ function RouteComponent() {
               decoding="async"
               className="size-10"
               style={
-                placeId === 'oops'
+                place.neon
                   ? {
                       animation: 'neon-logo-pulse 2.5s ease-in-out infinite',
                     }
@@ -332,7 +346,7 @@ function RouteComponent() {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={place.instagramUrl}
+                  href={place.instagram_url}
                   onClick={handleInstagramButtonClicked}
                 />
               }
@@ -347,7 +361,7 @@ function RouteComponent() {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={place.facebookUrl}
+                  href={place.facebook_url}
                   onClick={handleFacebookButtonClicked}
                 />
               }
@@ -365,24 +379,15 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <Separator
-        className="bg-primary -my-2 opacity-25"
-        style={oopsNeonStyles}
-      />
+      <Separator className="bg-primary -my-2 opacity-25" style={neonStyles} />
       <CarouselGallery images={galleryImages} />
-      <Separator
-        className="bg-primary -my-2 opacity-25"
-        style={oopsNeonStyles}
-      />
+      <Separator className="bg-primary -my-2 opacity-25" style={neonStyles} />
       <div>
         <p className="text-sm">
-          <HighlightedText text={place.description} neon={placeId === 'oops'} />
+          <HighlightedText text={place.description} neon={place.neon} />
         </p>
       </div>
-      <Separator
-        className="bg-primary -my-2 opacity-25"
-        style={oopsNeonStyles}
-      />
+      <Separator className="bg-primary -my-2 opacity-25" style={neonStyles} />
       <p className="text-xs text-neutral-400 text-center">
         Podkręć suwak doświetlania w kamerze, to łatwy sposób na jeszcze
         piękniejsze zdjęcia!
@@ -399,7 +404,7 @@ function RouteComponent() {
         />
         <Button
           className="h-20 text-xl w-full"
-          style={{ ...oopsNeonStyles, borderWidth: '4px' }}
+          style={{ ...neonStyles, borderWidth: '4px' }}
           onClick={handleCaptureImageButtonClicked}
           disabled={selectedFiles.length >= 6}
         >
@@ -447,8 +452,8 @@ function RouteComponent() {
           onClick={handleUploadButtonClicked}
           className="h-12"
           style={
-            placeId === 'oops' && !isUploadingDisabled
-              ? { ...oopsNeonStyles, borderWidth: '4px' }
+            place.neon && !isUploadingDisabled
+              ? { ...neonStyles, borderWidth: '4px' }
               : undefined
           }
         >
@@ -475,14 +480,11 @@ function RouteComponent() {
       </div>
       <p className="text-xs text-neutral-400">
         Klikając przycisk „Wyślij", akceptujesz{' '}
-        <Link
-          to="/polityka-prywatnosci"
-          className="underline hover:text-primary"
-        >
+        <Link to="/privacy-policy" className="underline hover:text-primary">
           Politykę prywatności
         </Link>{' '}
         i{' '}
-        <Link to="/regulamin" className="underline hover:text-primary">
+        <Link to="/tos" className="underline hover:text-primary">
           Regulamin
         </Link>{' '}
         serwisu.
@@ -491,8 +493,8 @@ function RouteComponent() {
         visible={showThanksScreen}
         onVisibleChange={handleThanksVisibleChange}
         backgroundUri={`/places/${placeId}/background.webp`}
-        backgroundOpacity={place.backgroundOpacity}
-        neon={placeId === 'oops'}
+        backgroundOpacity={place.background_opacity}
+        neon={place.neon}
         shareFiles={shareFiles}
         canShareFiles={canShareFiles}
         onInstagramShare={handleThanksInstagramShare}

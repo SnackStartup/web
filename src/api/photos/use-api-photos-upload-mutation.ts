@@ -1,15 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 import { useRef } from 'react'
-import { apiClient } from './client'
+import { apiClient } from '../client'
 import { compressImage } from '#/lib/compress-image'
 import { analyticsCapture } from '#/lib/analytics'
 
-const randomUploadId = () =>
-  typeof crypto.randomUUID === 'function'
-    ? crypto.randomUUID()
-    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
-
-export const useApiUploadPhotosMutation = () => {
+export const useApiPhotosUploadMutation = () => {
   const progressRef = useRef<Map<File, number>>(new Map())
   const compressedFilesRef = useRef<File[]>([])
 
@@ -22,7 +17,7 @@ export const useApiUploadPhotosMutation = () => {
       files: File[]
       placeId: string
     }) => {
-      analyticsCapture('try_upload_photos', { count: files.length })
+      analyticsCapture('upload_photos', { count: files.length })
 
       const compressed = await Promise.all(files.map(compressImage))
       compressedFilesRef.current = compressed
@@ -30,17 +25,15 @@ export const useApiUploadPhotosMutation = () => {
       files.forEach((f) => progressRef.current.set(f, 0))
 
       const failed: unknown[] = []
-      const uploadId = randomUploadId()
       // Sequential: 6 parallel uploads starve a 100 kbps link and time out.
       for (let i = 0; i < compressed.length; i++) {
         const file = compressed[i]
         const original = files[i]
         const formData = new FormData()
         formData.append('files', file)
-        formData.append('upload_id', uploadId)
         formData.append('place_id', placeId)
         try {
-          await apiClient.post('/upload_photos', formData, {
+          await apiClient.post('/photos/upload', formData, {
             timeout: 120000,
             'axios-retry': { retries: 1 }, // override client.ts's global 3x retry
             onUploadProgress: (e) => {

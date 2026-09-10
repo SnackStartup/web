@@ -1,16 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { CheckoutElementsProvider } from '@stripe/react-stripe-js/checkout'
 import { loadStripe } from '@stripe/stripe-js'
-import { useApiCreateCheckoutSessionMutation } from '#/api/useApiCreateCheckoutSessionMutation'
-import { useMemo } from 'react'
+import { useApiPaymentsCreateCheckoutSessionMutation } from '#/api/payments/use-api-payments-create-checkout-session-mutation'
+import { useEffect } from 'react'
 import CheckoutForm from '#/components/checkout-form'
-import { Page } from '#/components/Page'
+import { Page } from '#/components/page'
 import { Spinner } from '#/components/ui/spinner'
 import { Button } from '#/components/ui/button'
-import { places } from '#/data/places'
-import type { Place } from '#/data/places'
-import { NotFoundComponent } from '#/components/NotFoundComponent'
+import { NotFoundComponent } from '#/components/not-found-component'
 import { CheckCircle2Icon, ShieldCheckIcon } from 'lucide-react'
+import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
 
 export const Route = createFileRoute('/pay/$id')({
   component: RouteComponent,
@@ -26,17 +25,17 @@ const PLAN_FEATURES = [
 ]
 
 function RouteComponent() {
-  const { id: placeId } = Route.useParams()
-  const place = places[placeId as keyof typeof places] as Place | undefined
-  const apiCreateCheckoutSessionMutation = useApiCreateCheckoutSessionMutation()
+  const { id: token } = Route.useParams()
+  const apiCreateSessionMutation = useApiPaymentsCreateCheckoutSessionMutation()
 
-  const clientSecret = useMemo(async () => {
-    return apiCreateCheckoutSessionMutation
-      .mutateAsync(placeId)
-      .then((res) => res.client_secret)
-  }, [placeId])
+  useEffect(() => {
+    apiCreateSessionMutation.mutate(token)
+  }, [token])
 
-  const plan = apiCreateCheckoutSessionMutation.data?.plan
+  const placeId = apiCreateSessionMutation.data?.place_id ?? ''
+  const placeQuery = useApiPlaceQuery(placeId)
+  const place = placeQuery.data
+  const plan = apiCreateSessionMutation.data?.plan
   const priceLabel = plan
     ? new Intl.NumberFormat('pl-PL', {
         style: 'currency',
@@ -46,14 +45,47 @@ function RouteComponent() {
     : null
   const periodLabel = plan?.interval === 'year' ? 'rok' : 'miesiąc'
 
-  if (!place) {
+  if (apiCreateSessionMutation.isPending) {
+    return (
+      <Page className="flex min-h-screen items-center justify-center">
+        <Spinner className="size-12" />
+      </Page>
+    )
+  }
+
+  if (apiCreateSessionMutation.isError) {
+    return (
+      <Page className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+        <p role="alert" className="text-sm text-destructive">
+          Ten link płatności jest nieprawidłowy lub wygasł.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => apiCreateSessionMutation.mutate(token)}
+        >
+          Spróbuj ponownie
+        </Button>
+      </Page>
+    )
+  }
+
+  if (placeId && placeQuery.isPending) {
+    return (
+      <Page className="flex min-h-screen items-center justify-center">
+        <Spinner className="size-12" />
+      </Page>
+    )
+  }
+  if (placeQuery.isError || !place) {
     return <NotFoundComponent />
   }
+
+  const clientSecret = apiCreateSessionMutation.data?.client_secret
 
   return (
     <Page
       className="min-h-screen px-4 py-6"
-      style={{ ['--primary' as string]: place.primaryColor }}
+      style={{ ['--primary' as string]: place.primary_color }}
     >
       <div className="mx-auto flex w-full max-w-md flex-col gap-6">
         {/* Place header */}
@@ -82,7 +114,7 @@ function RouteComponent() {
               <li key={feature} className="flex items-start gap-2">
                 <CheckCircle2Icon
                   className="mt-0.5 size-4 shrink-0"
-                  style={{ color: place.primaryColor }}
+                  style={{ color: place.primary_color }}
                 />
                 <span>{feature}</span>
               </li>
@@ -99,25 +131,7 @@ function RouteComponent() {
         {/* Payment */}
         <section className="flex flex-col gap-4">
           <h3 className="font-semibold">Płatność</h3>
-          {apiCreateCheckoutSessionMutation.isPending && (
-            <div className="flex items-center justify-center py-8">
-              <Spinner />
-            </div>
-          )}
-          {apiCreateCheckoutSessionMutation.isError && (
-            <div className="flex flex-col gap-3">
-              <p role="alert" className="text-sm text-destructive text-center">
-                Nie udało się uruchomić płatności.
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => apiCreateCheckoutSessionMutation.mutate(placeId)}
-              >
-                Spróbuj ponownie
-              </Button>
-            </div>
-          )}
-          {apiCreateCheckoutSessionMutation.isSuccess && (
+          {clientSecret && (
             <CheckoutElementsProvider
               stripe={stripePromise}
               options={{ clientSecret }}
@@ -133,14 +147,11 @@ function RouteComponent() {
 
         <p className="text-center text-xs text-neutral-500">
           Klikając w przycisk płatności, akceptujesz{' '}
-          <Link to="/regulamin" className="underline hover:text-primary">
+          <Link to="/tos" className="underline hover:text-primary">
             Regulamin
           </Link>{' '}
           i{' '}
-          <Link
-            to="/polityka-prywatnosci"
-            className="underline hover:text-primary"
-          >
+          <Link to="/privacy-policy" className="underline hover:text-primary">
             Politykę prywatności
           </Link>
           .

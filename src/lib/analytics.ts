@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 type EventProps = Record<string, unknown>
 
 let posthog: import('posthog-js').PostHog | null = null
@@ -8,7 +9,7 @@ export const initAnalytics = () => {
   if (!import.meta.env.VITE_POSTHOG_PROJECT_TOKEN || initPromise) return
   initPromise = new Promise<void>((resolve) => {
     const s = document.createElement('script')
-    s.src = 'https://us-assets.i.posthog.com/static/array.js'
+    s.src = 'https://eu-assets.i.posthog.com/static/array.js'
     s.async = true
     s.dataset.projectToken = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN
     s.onload = () => {

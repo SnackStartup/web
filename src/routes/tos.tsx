@@ -2,10 +2,10 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import content from '#/content/terms-of-service.md?raw'
-import { Page } from '#/components/Page'
+import { Page } from '#/components/page'
 import { Button } from '#/components/ui/button'
 
-export const Route = createFileRoute('/regulamin')({
+export const Route = createFileRoute('/tos')({
   component: RouteComponent,
 })
 

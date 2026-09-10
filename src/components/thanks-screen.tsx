@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { FaHeart, FaInstagram, FaXmark } from 'react-icons/fa6'
 
-import './ThanksScreen.css'
+import './thanks-screen.css'
 import { cn } from '#/lib/utils'
 
 type Props = {
