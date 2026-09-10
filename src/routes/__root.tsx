@@ -49,7 +49,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] min-h-screen flex flex-col">
         <QueryClientProvider client={queryClient}>
-          <Header />
           <div className="flex-1 flex flex-col">{children}</div>
           <Footer className="mt-16" />
           {import.meta.env.PROD && <Analytics />}
