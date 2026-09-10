@@ -11,7 +11,6 @@ type Props = {
   backgroundOpacity?: string
   neon?: boolean
   shareFiles?: File[]
-  canShareFiles?: boolean
   onInstagramShare?: () => void
 }
 
@@ -22,7 +21,6 @@ export const ThanksScreen: React.FC<Props> = ({
   backgroundOpacity,
   neon,
   shareFiles,
-  canShareFiles,
   onInstagramShare,
 }) => {
   useEffect(() => {
@@ -44,7 +42,7 @@ export const ThanksScreen: React.FC<Props> = ({
     }
   }, [visible])
 
-  const showInstagramShare = canShareFiles && (shareFiles?.length ?? 0) > 0
+  const showInstagramShare = (shareFiles?.length ?? 0) > 0
 
   return (
     <div

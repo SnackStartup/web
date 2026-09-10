@@ -47,12 +47,6 @@ function RouteComponent() {
   const [shareFiles, setShareFiles] = useState<File[]>([])
   const clientCycleLastTapRef = useRef(0)
   const clientCycleTapCountRef = useRef(0)
-  const canSharePics =
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    navigator?.canShare && navigator.canShare({ files: selectedFiles })
-  const canShareFiles =
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    navigator?.canShare && navigator.canShare({ files: shareFiles })
   const isUploading = apiPhotosUploadMutation.isPending
   const [uploadFailed, setUploadFailed] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<Map<File, number>>(
@@ -174,11 +168,13 @@ function RouteComponent() {
       ...placeProps,
       files: selectedFiles.map((file) => file.name),
     })
-    if (canSharePics) {
+    try {
       await navigator.share({
         title: `Stolik — ${place.name}`,
         files: selectedFiles,
       })
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -466,7 +462,7 @@ function RouteComponent() {
                 : 'Wyślij'}
           </span>
         </Button>
-        {canSharePics && selectedFiles.length > 0 && (
+        {selectedFiles.length > 0 && (
           <Button
             variant="secondary"
             size="lg"
@@ -474,7 +470,7 @@ function RouteComponent() {
             className="h-12"
           >
             <Share2Icon />
-            Udostępnij zdjęcia znajomym
+            Udostępnij zdjęcia
           </Button>
         )}
       </div>
@@ -496,7 +492,6 @@ function RouteComponent() {
         backgroundOpacity={place.background_opacity}
         neon={place.neon}
         shareFiles={shareFiles}
-        canShareFiles={canShareFiles}
         onInstagramShare={handleThanksInstagramShare}
       />
     </Page>
