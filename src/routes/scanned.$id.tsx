@@ -32,6 +32,12 @@ import { cn } from '#/lib/utils'
 import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
 import { useApiPlacesQuery } from '#/api/places/use-api-places-query'
 import { useApiGalleryManifestQuery } from '#/api/places/use-api-places-gallery-manifest'
+import type {
+  FreeCoffeeReason,
+  UploadResponse,
+} from '#/api/photos/use-api-photos-upload-mutation'
+import { useApiClaimMutation } from '#/api/auth/use-api-claim-mutation'
+import { useApiGoogleAuthMutation } from '#/api/auth/use-api-google-auth-mutation'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -64,6 +70,15 @@ function RouteComponent() {
     tile: `/places/${placeId}/tile-${i + 1}.webp`,
     full: `/places/${placeId}/full-${i + 1}.webp`,
   }))
+  const [coffeeInfo, setCoffeeInfo] = useState<
+    { reason: FreeCoffeeReason } | undefined
+  >()
+  const [uploadId, setUploadId] = useState<string | null>(null)
+  const [verifyingCoffee, setVerifyingCoffee] = useState(false)
+  const [showCoffeeCounter, setShowCoffeeCounter] = useState(false)
+  const apiClaimMutation = useApiClaimMutation()
+  const apiGoogleAuthMutation = useApiGoogleAuthMutation()
+  const clientTapTimesRef = useRef<number[]>([])
 
   /*
    *
@@ -124,10 +139,12 @@ function RouteComponent() {
     apiPhotosUploadMutation.mutate(
       { files: selectedFiles, placeId },
       {
-        onSuccess() {
+        onSuccess(data) {
           setUploadProgress(new Map())
           setShareFiles(apiPhotosUploadMutation.getCompressedFiles())
           setSelectedFiles([])
+          setUploadId(data.uploadId ?? null) // ← keep across login
+          setCoffeeInfo(undefined) // wait for google
           setShowThanksScreen(true)
         },
         onError(error) {
@@ -194,7 +211,10 @@ function RouteComponent() {
 
   const handleThanksVisibleChange = (visible: boolean) => {
     setShowThanksScreen(visible)
-    if (!visible) setShareFiles([])
+    if (!visible) {
+      setShareFiles([])
+      setCoffeeInfo(undefined)
+    }
   }
 
   const handleRatingClicked = () => {
@@ -204,21 +224,40 @@ function RouteComponent() {
   const handleClientLogoClicked = () => {
     if (isUploading) return
     const now = Date.now()
-    if (now - clientCycleLastTapRef.current > 600) {
-      clientCycleTapCountRef.current = 0
+    clientTapTimesRef.current = [
+      ...clientTapTimesRef.current.filter((t) => now - t <= 600),
+      now,
+    ]
+    const taps = clientTapTimesRef.current.length
+    if (taps === 2) setShowCoffeeCounter((prev) => !prev) // toggle on/off
+    if (taps >= 3) {
+      clientTapTimesRef.current = []
+      setShowCoffeeCounter(false)
+      const ids = placesQuery.data?.map((p) => p.id) ?? []
+      if (ids.length === 0) return
+      const currentIndex = ids.indexOf(placeId)
+      navigate({
+        to: '/scanned/$id',
+        params: { id: ids[(currentIndex + 1) % ids.length] },
+      })
     }
-    clientCycleLastTapRef.current = now
-    clientCycleTapCountRef.current += 1
-    if (clientCycleTapCountRef.current < 3) return
+  }
 
-    clientCycleTapCountRef.current = 0
-    const ids = placesQuery.data?.map((p) => p.id) ?? []
-    if (ids.length === 0) return
-    const currentIndex = ids.indexOf(placeId)
-    navigate({
-      to: '/scanned/$id',
-      params: { id: ids[(currentIndex + 1) % ids.length] },
-    })
+  const handleGoogleSuccess = async (idToken: string) => {
+    if (!idToken || idToken === '__error__' || !uploadId) return
+    setVerifyingCoffee(true)
+    try {
+      await apiGoogleAuthMutation.mutateAsync({ idToken })
+      const result = await apiClaimMutation.mutateAsync({ placeId, uploadId })
+      setCoffeeInfo(result.reason ? { reason: result.reason } : undefined)
+      if (result.free_coffee)
+        analyticsCapture('free_coffee_granted', placeProps)
+      await placeQuery.refetch() // live-update hidden counter
+    } catch (error) {
+      setCoffeeInfo({ reason: 'budget_exhausted' })
+    } finally {
+      setVerifyingCoffee(false)
+    }
   }
 
   /*
@@ -272,15 +311,22 @@ function RouteComponent() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row gap-2 items-center">
-            <img
-              src={`/places/${placeId}/logo-96.webp`}
-              decoding="async"
-              fetchPriority="high"
-              width={96}
-              height={96}
-              onClick={handleClientLogoClicked}
-              className="size-12 rounded-full aspect-square object-cover"
-            />
+            <div className="relative">
+              <img
+                src={`/places/${placeId}/logo-96.webp`}
+                decoding="async"
+                fetchPriority="high"
+                width={96}
+                height={96}
+                onClick={handleClientLogoClicked}
+                className="size-12 rounded-full aspect-square object-cover"
+              />
+              {showCoffeeCounter && (
+                <span className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-background/95 px-2 py-2 text-xs font-semibold text-neutral-400 shadow">
+                  ☕ Kaw pozostało: {placeQuery.data.coffee_budget ?? 0}
+                </span>
+              )}
+            </div>
             <h1
               className="text-xs text-left text-primary font-semibold"
               style={
@@ -493,6 +539,9 @@ function RouteComponent() {
         neon={place.neon}
         shareFiles={shareFiles}
         onInstagramShare={handleThanksInstagramShare}
+        coffeeInfo={coffeeInfo}
+        verifyingCoffee={verifyingCoffee}
+        onGoogleSuccess={handleGoogleSuccess}
       />
     </Page>
   )

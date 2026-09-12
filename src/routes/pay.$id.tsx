@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { CheckoutElementsProvider } from '@stripe/react-stripe-js/checkout'
 import { loadStripe } from '@stripe/stripe-js'
+import type { Stripe } from '@stripe/stripe-js'
 import { useApiPaymentsCreateCheckoutSessionMutation } from '#/api/payments/use-api-payments-create-checkout-session-mutation'
-import { useEffect } from 'react'
+import type { PaymentMode } from '#/api/payments/types'
+import { useEffect, useState } from 'react'
 import CheckoutForm from '#/components/checkout-form'
 import { Page } from '#/components/page'
 import { Spinner } from '#/components/ui/spinner'
@@ -12,10 +14,21 @@ import { CheckCircle2Icon, ShieldCheckIcon } from 'lucide-react'
 import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
 
 export const Route = createFileRoute('/pay/$id')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: (['subscription', 'payment'].includes(search.mode as string)
+      ? search.mode
+      : 'subscription') as PaymentMode,
+  }),
   component: RouteComponent,
 })
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+const getStripePromise = () => {
+  const globals = globalThis as { __stripePromise?: Promise<Stripe | null> }
+  globals.__stripePromise ??= loadStripe(
+    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
+  )
+  return globals.__stripePromise
+}
 
 const PLAN_FEATURES = [
   'Profil lokalu w aplikacji Stolik',
@@ -26,24 +39,34 @@ const PLAN_FEATURES = [
 
 function RouteComponent() {
   const { id: token } = Route.useParams()
+  const { mode: searchMode } = Route.useSearch()
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<PaymentMode>(searchMode)
   const apiCreateSessionMutation = useApiPaymentsCreateCheckoutSessionMutation()
-
-  useEffect(() => {
-    apiCreateSessionMutation.mutate(token)
-  }, [token])
 
   const placeId = apiCreateSessionMutation.data?.place_id ?? ''
   const placeQuery = useApiPlaceQuery(placeId)
   const place = placeQuery.data
   const plan = apiCreateSessionMutation.data?.plan
+  const isOneTime = plan?.type === 'one_time'
   const priceLabel = plan
     ? new Intl.NumberFormat('pl-PL', {
         style: 'currency',
         currency: plan.currency,
-        maximumFractionDigits: 0,
-      }).format(plan.amount / 100)
+      }).format(plan.amount / 100) // 10000 -> "100,00 zł"
     : null
   const periodLabel = plan?.interval === 'year' ? 'rok' : 'miesiąc'
+
+  useEffect(() => {
+    apiCreateSessionMutation.reset() // drop stale client_secret when mode changes
+    apiCreateSessionMutation.mutate({ token, mode })
+  }, [token, mode])
+
+  const handleModeChange = (next: PaymentMode) => {
+    if (next === mode) return
+    setMode(next)
+    navigate({ to: '/pay/$id', params: { id: token }, search: { mode: next } })
+  }
 
   if (apiCreateSessionMutation.isPending) {
     return (
@@ -61,7 +84,7 @@ function RouteComponent() {
         </p>
         <Button
           variant="outline"
-          onClick={() => apiCreateSessionMutation.mutate(token)}
+          onClick={() => apiCreateSessionMutation.mutate({ token, mode })}
         >
           Spróbuj ponownie
         </Button>
@@ -104,6 +127,33 @@ function RouteComponent() {
           </div>
         </div>
 
+        {/* Mode selection */}
+        <section className="flex flex-col gap-2">
+          <h3 className="font-semibold">Wybierz opcję</h3>
+          <div
+            className="flex gap-2"
+            role="radiogroup"
+            aria-label="Rodzaj płatności"
+          >
+            <Button
+              variant={mode === 'subscription' ? 'default' : 'outline'}
+              className="flex-1"
+              disabled={apiCreateSessionMutation.isPending}
+              onClick={() => handleModeChange('subscription')}
+            >
+              Subskrypcja
+            </Button>
+            <Button
+              variant={mode === 'payment' ? 'default' : 'outline'}
+              className="flex-1"
+              disabled={apiCreateSessionMutation.isPending}
+              onClick={() => handleModeChange('payment')}
+            >
+              Jednorazowo
+            </Button>
+          </div>
+        </section>
+
         {/* Subscription plan */}
         <section className="flex flex-col gap-4 rounded-2xl border p-5">
           <h2 className="text-2xl font-bold text-primary">
@@ -122,9 +172,13 @@ function RouteComponent() {
           </ul>
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t pt-4">
             <span className="text-3xl font-bold">{priceLabel ?? '—'}</span>
-            <span className="text-sm text-neutral-500">
-              / {periodLabel} · odnawia się automatycznie
-            </span>
+            {isOneTime ? (
+              <span className="text-sm text-neutral-500">jednorazowo</span>
+            ) : (
+              <span className="text-sm text-neutral-500">
+                / {periodLabel} · odnawia się automatycznie
+              </span>
+            )}
           </div>
         </section>
 
@@ -133,7 +187,7 @@ function RouteComponent() {
           <h3 className="font-semibold">Płatność</h3>
           {clientSecret && (
             <CheckoutElementsProvider
-              stripe={stripePromise}
+              stripe={getStripePromise()}
               options={{ clientSecret }}
             >
               <CheckoutForm />
@@ -141,7 +195,8 @@ function RouteComponent() {
           )}
           <p className="flex items-center justify-center gap-2 text-xs text-neutral-500">
             <ShieldCheckIcon className="size-6" />
-            Płatność zabezpieczona przez Stripe. Anulujesz w każdej chwili.
+            Płatność zabezpieczona przez Stripe.{' '}
+            {isOneTime ? 'Płatna jednorazowo.' : 'Anulujesz w każdej chwili.'}
           </p>
         </section>
 

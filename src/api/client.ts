@@ -21,6 +21,7 @@ const getApiBaseUrl = () => {
 export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
   timeout: 30000,
+  withCredentials: true,
 })
 
 axiosRetry(apiClient, {

@@ -1,13 +1,13 @@
-@keyframes countdown {
-  from {
-    width: 100vw;
+@keyframes attention {
+  0%,
+  100% {
+    transform: scale(1);
   }
-
-  to {
-    width: 0vw;
+  50% {
+    transform: scale(1.04);
   }
 }
 
-.animate-countdown {
-  animation: countdown 10s linear forwards;
+.animate-attention {
+  animation: attention 1.6s ease-in-out infinite;
 }

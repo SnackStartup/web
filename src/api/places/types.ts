@@ -11,6 +11,7 @@ export type ApiPlace = {
   background_opacity?: string
   color_scheme?: 'dark' | 'light'
   neon?: boolean
+  coffee_budget?: number
 }
 
 export type ApiPlaceSummary = Pick<ApiPlace, 'id' | 'name' | 'suffix'>

@@ -11,6 +11,7 @@ import { initAnalytics } from '#/lib/analytics'
 import { ErrorComponent } from '#/components/error-component'
 import { NotFoundComponent } from '#/components/not-found-component'
 import { Header } from '#/components/header'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -34,6 +35,7 @@ export const Route = createRootRoute({
 })
 
 const queryClient = new QueryClient()
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -49,7 +51,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] min-h-screen flex flex-col">
         <QueryClientProvider client={queryClient}>
-          <div className="flex-1 flex flex-col">{children}</div>
+          <GoogleOAuthProvider clientId={googleClientId}>
+            <div className="flex-1 flex flex-col">{children}</div>
+          </GoogleOAuthProvider>
           <Footer className="mt-16" />
           {import.meta.env.PROD && <Analytics />}
           {import.meta.env.DEV && (
