@@ -99,7 +99,7 @@ export const ThanksScreen: React.FC<Props> = ({
           <FaHeart className="size-20 text-pink-500 animate-bounce" />
         )}
         <h1
-          className="text-3xl font-bold"
+          className="text-3xl font-bold text-center"
           style={
             neon
               ? { animation: 'neon-text-pulse 2.5s ease-in-out infinite' }
