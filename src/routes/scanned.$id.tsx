@@ -38,6 +38,7 @@ import type {
 } from '#/api/photos/use-api-photos-upload-mutation'
 import { useApiClaimMutation } from '#/api/auth/use-api-claim-mutation'
 import { useApiGoogleAuthMutation } from '#/api/auth/use-api-google-auth-mutation'
+import { useThanksStore, THANKS_TTL_MS } from '#/lib/thanks-store'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -79,6 +80,8 @@ function RouteComponent() {
   const apiClaimMutation = useApiClaimMutation()
   const apiGoogleAuthMutation = useApiGoogleAuthMutation()
   const clientTapTimesRef = useRef<number[]>([])
+  const thanksStore = useThanksStore()
+  const restoredRef = useRef(false)
 
   /*
    *
@@ -104,6 +107,27 @@ function RouteComponent() {
     }, 100)
     return () => clearInterval(id)
   }, [isUploading, apiPhotosUploadMutation.getProgress])
+
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    if (
+      !thanksStore.uploadId ||
+      thanksStore.placeId !== placeId ||
+      !thanksStore.savedAt ||
+      Date.now() - thanksStore.savedAt > THANKS_TTL_MS
+    ) {
+      if (thanksStore.uploadId) thanksStore.clear()
+      return
+    }
+    setUploadId(thanksStore.uploadId)
+    setCoffeeInfo(
+      thanksStore.coffeeReason
+        ? { reason: thanksStore.coffeeReason }
+        : undefined,
+    )
+    setShowThanksScreen(true)
+  }, [placeId, thanksStore])
 
   useLayoutEffect(() => {
     const isDark = place?.color_scheme === 'dark'
@@ -143,7 +167,10 @@ function RouteComponent() {
           setUploadProgress(new Map())
           setShareFiles(apiPhotosUploadMutation.getCompressedFiles())
           setSelectedFiles([])
-          setUploadId(data.uploadId ?? null) // ← keep across login
+          if (data.uploadId) {
+            setUploadId(data.uploadId)
+            thanksStore.saveUpload(placeId, data.uploadId)
+          }
           setCoffeeInfo(undefined) // wait for google
           setShowThanksScreen(true)
         },
@@ -214,6 +241,7 @@ function RouteComponent() {
     if (!visible) {
       setShareFiles([])
       setCoffeeInfo(undefined)
+      thanksStore.clear()
     }
   }
 
@@ -250,11 +278,13 @@ function RouteComponent() {
       await apiGoogleAuthMutation.mutateAsync({ idToken })
       const result = await apiClaimMutation.mutateAsync({ placeId, uploadId })
       setCoffeeInfo(result.reason ? { reason: result.reason } : undefined)
+      if (result.reason) thanksStore.setCoffeeReason(result.reason)
       if (result.free_coffee)
         analyticsCapture('free_coffee_granted', placeProps)
-      await placeQuery.refetch() // live-update hidden counter
+      await placeQuery.refetch()
     } catch (error) {
       setCoffeeInfo({ reason: 'budget_exhausted' })
+      thanksStore.setCoffeeReason('budget_exhausted')
     } finally {
       setVerifyingCoffee(false)
     }
