@@ -10,7 +10,7 @@ In `/etc/avahi/avahi-daemon.conf` under [server] add:
 allow-interfaces=<your-int-id>
 ```
 
-then
+and then
 
 ```
 sudo systemctl restart avahi-daemon
