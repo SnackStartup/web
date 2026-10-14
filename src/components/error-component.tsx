@@ -3,7 +3,7 @@ import { LuCircleAlert } from 'react-icons/lu'
 import { Button } from './ui/button'
 
 export const ErrorComponent: React.FC<{
-  error: Error
+  error: unknown
   reset: () => void
 }> = ({ reset }) => {
   return (
