@@ -27,7 +27,7 @@ export const Route = createRootRoute({
         title: 'Stolik',
       },
     ],
-    links: [{ rel: 'icon', href: '/icon-96.png' }],
+    links: [{ rel: 'icon', href: '/logo.svg', type: 'image/svg+xml' }],
   }),
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
@@ -54,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <GoogleOAuthProvider clientId={googleClientId}>
             <div className="flex-1 flex flex-col">{children}</div>
           </GoogleOAuthProvider>
-          <Footer className="mt-16" />
+          <Footer className="mt-16 pb-14" />
           {import.meta.env.PROD && <Analytics />}
           {import.meta.env.DEV && (
             <TanStackDevtools

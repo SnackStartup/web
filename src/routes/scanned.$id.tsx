@@ -39,6 +39,7 @@ import type {
 import { useApiClaimMutation } from '#/api/auth/use-api-claim-mutation'
 import { useApiGoogleAuthMutation } from '#/api/auth/use-api-google-auth-mutation'
 import { useThanksStore, THANKS_TTL_MS } from '#/lib/thanks-store'
+import { WalletBar } from '#/components/wallet/wallet-bar'
 
 export const Route = createFileRoute('/scanned/$id')({
   component: RouteComponent,
@@ -320,7 +321,7 @@ function RouteComponent() {
     <Page
       className={cn(
         'relative flex flex-col gap-6 overflow-hidden min-h-screen',
-        'mx-auto w-full max-w-xl lg:max-w-2xl px-6 py-6',
+        'mx-auto w-full max-w-xl lg:max-w-2xl px-6 py-6 pb-24',
         place.color_scheme === 'dark' && 'dark',
       )}
       style={{ ['--primary' as string]: place.primary_color }}
@@ -380,7 +381,7 @@ function RouteComponent() {
           >
             <h1 className="font-bold text-xl">Stolik</h1>
             <img
-              src="/icon-96.png"
+              src="/logo.svg"
               decoding="async"
               className="size-10"
               style={
@@ -561,6 +562,7 @@ function RouteComponent() {
         </Link>{' '}
         serwisu.
       </p>
+      <WalletBar />
       <ThanksScreen
         visible={showThanksScreen}
         onVisibleChange={handleThanksVisibleChange}

@@ -7,6 +7,7 @@ import type { FreeCoffeeReason } from '#/api/photos/use-api-photos-upload-mutati
 import { Page } from './page'
 import { GoogleLogin } from '@react-oauth/google'
 import { Spinner } from './ui/spinner'
+import { WalletInvite } from './wallet/wallet-invite'
 
 const COFFEE_REASON_MESSAGES: Record<FreeCoffeeReason, string> = {
   granted: 'Oto twoja kawa za pierwsze zdjęcie w naszym lokalu!',
@@ -129,25 +130,28 @@ export const ThanksScreen: React.FC<Props> = ({
           </div>
         )}
         {hasCoffee && (
-          <div
-            className="mt-8 flex w-full max-w-sm flex-col items-center gap-1 rounded-2xl bg-primary px-5 py-4 text-center shadow-xl animate-attention"
-            style={
-              neon
-                ? {
-                    boxShadow:
-                      '0 0 0 3px var(--primary), 0 0 28px var(--primary)',
-                  }
-                : undefined
-            }
-          >
-            <FaEye className="size-8 text-primary-foreground" />
-            <p className="text-base font-bold uppercase tracking-wide text-primary-foreground">
-              Pokaż ten ekran obsłudze
-            </p>
-            <p className="text-sm text-primary-foreground/80">
-              aby odebrać darmową kawę
-            </p>
-          </div>
+          <>
+            <div
+              className="mt-8 flex w-full max-w-sm flex-col items-center gap-1 rounded-2xl bg-primary px-5 py-4 text-center shadow-xl animate-attention"
+              style={
+                neon
+                  ? {
+                      boxShadow:
+                        '0 0 0 3px var(--primary), 0 0 28px var(--primary)',
+                    }
+                  : undefined
+              }
+            >
+              <FaEye className="size-8 text-primary-foreground" />
+              <p className="text-base font-bold uppercase tracking-wide text-primary-foreground">
+                Pokaż ten ekran obsłudze
+              </p>
+              <p className="text-sm text-primary-foreground/80">
+                aby odebrać darmową kawę
+              </p>
+            </div>
+            <WalletInvite />
+          </>
         )}
         {hasCoffeeNotice && (
           <div className="mt-3 flex items-center gap-2 rounded-full border border-neutral-500/50 px-4 py-2 text-neutral-400">
