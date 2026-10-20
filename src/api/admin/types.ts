@@ -53,9 +53,6 @@ export const zApiAdminMe = z.object({
 
 export type ApiAdminMe = z.infer<typeof zApiAdminMe>
 
-// Both QRs are served by the backend in these two formats.
-export type ApiQrFormat = 'png' | 'svg'
-
 export const zApiPlaceExport = z.object({
   version: z.number(),
   place: zApiAdminPlaceInput,
