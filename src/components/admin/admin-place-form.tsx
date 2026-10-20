@@ -95,6 +95,10 @@ export const AdminPlaceForm: React.FC<AdminPlaceFormProps> = ({
           value={value.description}
           onChange={(event) => onChange('description', event.target.value)}
         />
+        <FieldDescription>
+          Wrap a few words in asterisks to highlight them, for example *fresh
+          pastry*.
+        </FieldDescription>
       </Field>
 
       <div className="grid gap-4 md:grid-cols-4">

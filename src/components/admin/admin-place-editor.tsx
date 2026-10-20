@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Eye, Globe } from 'lucide-react'
 import { useApiAdminPlaceExportFetchQuery } from '#/api/admin/use-place-export-fetch-query'
-import { useApiPlaceDeleteMutation } from '#/api/admin/use-place-delete-mutation'
-import { useApiPlaceSaveMutation } from '#/api/admin/use-place-save-mutation'
-import { useApiBrandImageUploadMutation } from '#/api/admin/use-brand-image-upload-mutation'
+import { useApiAdminPlaceDeleteMutation } from '#/api/admin/use-place-delete-mutation'
+import { useApiAdminPlaceSaveMutation } from '#/api/admin/use-place-save-mutation'
+import { useApiAdminBrandImageUploadMutation } from '#/api/admin/use-brand-image-upload-mutation'
 import type { ApiAdminPlace, ApiAdminPlaceInput } from '#/api/admin/types'
 import { AdminConfirmDialog } from '#/components/admin/admin-confirm-dialog'
 import { AdminGalleryEditor } from '#/components/admin/admin-gallery-editor'
@@ -28,9 +28,9 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
   place,
 }) => {
   const navigate = useNavigate()
-  const apiPlaceSaveMutation = useApiPlaceSaveMutation()
-  const apiPlaceDeleteMutation = useApiPlaceDeleteMutation()
-  const apiBrandImageUploadMutation = useApiBrandImageUploadMutation()
+  const apiAdminPlaceSaveMutation = useApiAdminPlaceSaveMutation()
+  const apiAdminPlaceDeleteMutation = useApiAdminPlaceDeleteMutation()
+  const apiAdminBrandImageUploadMutation = useApiAdminBrandImageUploadMutation()
   const apiAdminPlaceExportFetchQuery = useApiAdminPlaceExportFetchQuery(
     place?.id ?? '',
   )
@@ -46,7 +46,7 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
   ) => setForm((previous) => ({ ...previous, [key]: value }))
 
   const save = () => {
-    apiPlaceSaveMutation.mutate(
+    apiAdminPlaceSaveMutation.mutate(
       { place: { ...form, id: form.id.trim().toLowerCase() }, isNew },
       {
         onSuccess: async (saved) => {
@@ -72,11 +72,11 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
     if (result.data) downloadJsonFile(`${place.id}.stolik.json`, result.data)
   }
 
-  const saveStatus = apiPlaceSaveMutation.isPending
+  const saveStatus = apiAdminPlaceSaveMutation.isPending
     ? 'Saving…'
-    : apiPlaceSaveMutation.isError
+    : apiAdminPlaceSaveMutation.isError
       ? 'Could not save.'
-      : apiPlaceSaveMutation.isSuccess
+      : apiAdminPlaceSaveMutation.isSuccess
         ? 'Saved'
         : null
 
@@ -112,8 +112,8 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
       <AdminPlaceForm value={form} isNew={isNew} onChange={setField} />
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={apiPlaceSaveMutation.isPending} onClick={save}>
-          {apiPlaceSaveMutation.isPending ? 'Saving…' : 'Save'}
+        <Button disabled={apiAdminPlaceSaveMutation.isPending} onClick={save}>
+          {apiAdminPlaceSaveMutation.isPending ? 'Saving…' : 'Save'}
         </Button>
         {!isNew && place && (
           <Button
@@ -131,7 +131,7 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
           <Button
             variant="destructive"
             className="ml-auto"
-            disabled={apiPlaceDeleteMutation.isPending}
+            disabled={apiAdminPlaceDeleteMutation.isPending}
             onClick={() => setDeleteOpen(true)}
           >
             Delete place
@@ -151,10 +151,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
             <AdminImageSlot
               label="Logo"
               imageUrl={place.logo_url}
-              isUploading={apiBrandImageUploadMutation.isPending}
+              isUploading={apiAdminBrandImageUploadMutation.isPending}
               onPreview={setPreviewUrl}
               onUpload={(file) =>
-                apiBrandImageUploadMutation.mutate({
+                apiAdminBrandImageUploadMutation.mutate({
                   placeId: place.id,
                   kind: 'logo',
                   file,
@@ -164,10 +164,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
             <AdminImageSlot
               label="Background"
               imageUrl={place.background_url}
-              isUploading={apiBrandImageUploadMutation.isPending}
+              isUploading={apiAdminBrandImageUploadMutation.isPending}
               onPreview={setPreviewUrl}
               onUpload={(file) =>
-                apiBrandImageUploadMutation.mutate({
+                apiAdminBrandImageUploadMutation.mutate({
                   placeId: place.id,
                   kind: 'background',
                   file,
@@ -178,7 +178,7 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
 
           <AdminGalleryEditor place={place} onPreview={setPreviewUrl} />
           <AdminQrPanel placeId={place.id} onPreview={setPreviewUrl} />
-          <AdminPaymentPanel place={place} />
+          <AdminPaymentPanel place={place} onPreview={setPreviewUrl} />
         </>
       )}
 
@@ -187,10 +187,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
         title="Delete this place?"
         description="The place and all of its photos are gone. This cannot be undone."
         confirmLabel="Delete place"
-        isPending={apiPlaceDeleteMutation.isPending}
+        isPending={apiAdminPlaceDeleteMutation.isPending}
         onConfirm={() => {
           if (!place) return
-          apiPlaceDeleteMutation.mutate(place.id, {
+          apiAdminPlaceDeleteMutation.mutate(place.id, {
             onSuccess: () => void navigate({ to: '/admin' }),
           })
         }}

@@ -6,6 +6,8 @@ export const adminKeys = {
   placeExport: (id: string) => ['admin', 'place', id, 'export'] as const,
   placeQr: (id: string, format: string) =>
     ['admin', 'place', id, 'qr', format] as const,
+  paymentQr: (id: string, format: string) =>
+    ['admin', 'place', id, 'payment-qr', format] as const,
 }
 
 export const placeKeys = {

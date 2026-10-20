@@ -1,21 +1,26 @@
 import { useRef, useState } from 'react'
-import { useApiPaymentTokenRevokeMutation } from '#/api/admin/use-payment-token-revoke-mutation'
-import { useApiPaymentTokenRotateMutation } from '#/api/admin/use-payment-token-rotate-mutation'
+import { useApiAdminPaymentTokenRevokeMutation } from '#/api/admin/use-payment-token-revoke-mutation'
+import { useApiAdminPaymentTokenRotateMutation } from '#/api/admin/use-payment-token-rotate-mutation'
 import type { ApiAdminPlace } from '#/api/admin/types'
 import { AdminConfirmDialog } from '#/components/admin/admin-confirm-dialog'
+import { AdminPaymentQrPanel } from '#/components/admin/admin-payment-qr-panel'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { getPublicWebUrl } from '#/lib/env'
 
 export type AdminPaymentPanelProps = {
   place: ApiAdminPlace
+  onPreview: (url: string) => void
 }
 
 export const AdminPaymentPanel: React.FC<AdminPaymentPanelProps> = ({
   place,
+  onPreview,
 }) => {
-  const apiPaymentTokenRotateMutation = useApiPaymentTokenRotateMutation()
-  const apiPaymentTokenRevokeMutation = useApiPaymentTokenRevokeMutation()
+  const apiAdminPaymentTokenRotateMutation =
+    useApiAdminPaymentTokenRotateMutation()
+  const apiAdminPaymentTokenRevokeMutation =
+    useApiAdminPaymentTokenRevokeMutation()
   const linkInputRef = useRef<HTMLInputElement>(null)
   const [copied, setCopied] = useState(false)
   const [isRotateOpen, setRotateOpen] = useState(false)
@@ -25,8 +30,8 @@ export const AdminPaymentPanel: React.FC<AdminPaymentPanelProps> = ({
     ? `${getPublicWebUrl()}/pay/${place.payment_token}`
     : null
   const isPending =
-    apiPaymentTokenRotateMutation.isPending ||
-    apiPaymentTokenRevokeMutation.isPending
+    apiAdminPaymentTokenRotateMutation.isPending ||
+    apiAdminPaymentTokenRevokeMutation.isPending
 
   const copy = async () => {
     if (!link) return
@@ -76,14 +81,15 @@ export const AdminPaymentPanel: React.FC<AdminPaymentPanelProps> = ({
               Revoke
             </Button>
           </div>
+          <AdminPaymentQrPanel placeId={place.id} onPreview={onPreview} />
         </>
       ) : (
         <Button
           className="w-fit"
           disabled={isPending}
-          onClick={() => apiPaymentTokenRotateMutation.mutate(place.id)}
+          onClick={() => apiAdminPaymentTokenRotateMutation.mutate(place.id)}
         >
-          {apiPaymentTokenRotateMutation.isPending
+          {apiAdminPaymentTokenRotateMutation.isPending
             ? 'Generating…'
             : 'Generate payment link'}
         </Button>
@@ -94,9 +100,9 @@ export const AdminPaymentPanel: React.FC<AdminPaymentPanelProps> = ({
         title="Generate a new payment link?"
         description="The old link stops working immediately."
         confirmLabel="Rotate link"
-        isPending={apiPaymentTokenRotateMutation.isPending}
+        isPending={apiAdminPaymentTokenRotateMutation.isPending}
         onConfirm={() =>
-          apiPaymentTokenRotateMutation.mutate(place.id, {
+          apiAdminPaymentTokenRotateMutation.mutate(place.id, {
             onSuccess: () => setRotateOpen(false),
           })
         }
@@ -107,9 +113,9 @@ export const AdminPaymentPanel: React.FC<AdminPaymentPanelProps> = ({
         title="Revoke the payment link?"
         description="Guests can no longer pay for this place until you generate a new link."
         confirmLabel="Revoke link"
-        isPending={apiPaymentTokenRevokeMutation.isPending}
+        isPending={apiAdminPaymentTokenRevokeMutation.isPending}
         onConfirm={() =>
-          apiPaymentTokenRevokeMutation.mutate(place.id, {
+          apiAdminPaymentTokenRevokeMutation.mutate(place.id, {
             onSuccess: () => setRevokeOpen(false),
           })
         }

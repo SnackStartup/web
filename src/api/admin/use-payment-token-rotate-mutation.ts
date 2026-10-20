@@ -3,7 +3,7 @@ import { apiClient } from '../client'
 import { apiAdminInvalidatePlaceQueries } from './invalidate-place-queries'
 import type { ApiAdminPlace } from './types'
 
-export const useApiPaymentTokenRotateMutation = () => {
+export const useApiAdminPaymentTokenRotateMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (placeId: string) =>

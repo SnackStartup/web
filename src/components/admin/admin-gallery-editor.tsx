@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ArrowLeft, ArrowRight, Trash2 } from 'lucide-react'
-import { useApiGalleryImageDeleteMutation } from '#/api/admin/use-gallery-image-delete-mutation'
-import { useApiGalleryReorderMutation } from '#/api/admin/use-gallery-reorder-mutation'
-import { useApiGalleryImagesUploadMutation } from '#/api/admin/use-gallery-images-upload-mutation'
+import { useApiAdminGalleryImageDeleteMutation } from '#/api/admin/use-gallery-image-delete-mutation'
+import { useApiAdminGalleryReorderMutation } from '#/api/admin/use-gallery-reorder-mutation'
+import { useApiAdminGalleryImagesUploadMutation } from '#/api/admin/use-gallery-images-upload-mutation'
 import type { ApiAdminImage, ApiAdminPlace } from '#/api/admin/types'
 import { AdminConfirmDialog } from '#/components/admin/admin-confirm-dialog'
 import { Button } from '#/components/ui/button'
@@ -21,15 +21,17 @@ export const AdminGalleryEditor: React.FC<AdminGalleryEditorProps> = ({
   place,
   onPreview,
 }) => {
-  const apiGalleryImagesUploadMutation = useApiGalleryImagesUploadMutation()
-  const apiGalleryImageDeleteMutation = useApiGalleryImageDeleteMutation()
-  const apiGalleryReorderMutation = useApiGalleryReorderMutation()
+  const apiAdminGalleryImagesUploadMutation =
+    useApiAdminGalleryImagesUploadMutation()
+  const apiAdminGalleryImageDeleteMutation =
+    useApiAdminGalleryImageDeleteMutation()
+  const apiAdminGalleryReorderMutation = useApiAdminGalleryReorderMutation()
   const [imageToDelete, setImageToDelete] = useState<ApiAdminImage | null>(null)
 
   const isPending =
-    apiGalleryImagesUploadMutation.isPending ||
-    apiGalleryImageDeleteMutation.isPending ||
-    apiGalleryReorderMutation.isPending
+    apiAdminGalleryImagesUploadMutation.isPending ||
+    apiAdminGalleryImageDeleteMutation.isPending ||
+    apiAdminGalleryReorderMutation.isPending
   const isFull = place.gallery.length >= GALLERY_LIMIT
 
   const move = (from: number, to: number) => {
@@ -37,7 +39,7 @@ export const AdminGalleryEditor: React.FC<AdminGalleryEditorProps> = ({
     if (to < 0 || to >= imageIds.length) return
     const [moved] = imageIds.splice(from, 1)
     imageIds.splice(to, 0, moved)
-    apiGalleryReorderMutation.mutate({ placeId: place.id, imageIds })
+    apiAdminGalleryReorderMutation.mutate({ placeId: place.id, imageIds })
   }
 
   return (
@@ -51,12 +53,15 @@ export const AdminGalleryEditor: React.FC<AdminGalleryEditorProps> = ({
           multiple
           maxFiles={GALLERY_LIMIT - place.gallery.length}
           onAccept={(files) => {
-            apiGalleryImagesUploadMutation.mutate({ placeId: place.id, files })
+            apiAdminGalleryImagesUploadMutation.mutate({
+              placeId: place.id,
+              files,
+            })
           }}
         >
           <FileUploadTrigger asChild>
             <Button variant="outline" size="sm" disabled={isPending || isFull}>
-              {apiGalleryImagesUploadMutation.isPending && <Spinner />}
+              {apiAdminGalleryImagesUploadMutation.isPending && <Spinner />}
               Add photos
             </Button>
           </FileUploadTrigger>
@@ -119,10 +124,10 @@ export const AdminGalleryEditor: React.FC<AdminGalleryEditorProps> = ({
         title="Delete this photo?"
         description="It disappears from the guest page right away."
         confirmLabel="Delete photo"
-        isPending={apiGalleryImageDeleteMutation.isPending}
+        isPending={apiAdminGalleryImageDeleteMutation.isPending}
         onConfirm={() => {
           if (!imageToDelete) return
-          apiGalleryImageDeleteMutation.mutate(
+          apiAdminGalleryImageDeleteMutation.mutate(
             { placeId: place.id, imageId: imageToDelete.id },
             { onSuccess: () => setImageToDelete(null) },
           )

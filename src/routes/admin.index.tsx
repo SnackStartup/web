@@ -29,7 +29,7 @@ function AdminPlacesPage() {
 
       <p className="text-xs text-muted-foreground">
         Import creates a draft. Export a place from its editor to move it
-        between environments (e.g. staging → prod).
+        between environments (e.g. staging → production).
       </p>
 
       {apiAdminPlacesQuery.isLoading && <Spinner />}

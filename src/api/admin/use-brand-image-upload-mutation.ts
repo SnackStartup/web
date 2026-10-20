@@ -3,7 +3,7 @@ import { apiClient } from '../client'
 import { apiAdminInvalidatePlaceQueries } from './invalidate-place-queries'
 import type { ApiAdminPlace } from './types'
 
-export const useApiBrandImageUploadMutation = () => {
+export const useApiAdminBrandImageUploadMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({

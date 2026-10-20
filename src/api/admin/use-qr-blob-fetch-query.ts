@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../client'
 import { adminKeys } from '../query-keys'
-
-export type ApiQrFormat = 'png' | 'svg'
+import type { ApiQrFormat } from './types'
 
 // The QR encodes the place slug and the public web URL, so it stays fresh for
 // as long as the place itself does.

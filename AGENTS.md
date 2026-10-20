@@ -30,8 +30,11 @@ Prefixes carry the meaning, so no name is ambiguous out of context.
   ```
 
 - Every API call is a TanStack Query hook, never a plain fetch function. Hooks
-  start with `useApi` and read as `<resource><action>`:
-  `useApiPlaceSaveMutation`, `useApiGalleryReorderMutation`,
+  start with `useApi` and read as `<resource><action>`, and a call into the
+  admin area carries the area: `useApiAdminPlaceSaveMutation`,
+  `useApiAdminGalleryReorderMutation`, `useApiAdminPaymentTokenRotateMutation`.
+  Never `useApiPlaceSaveMutation` or `useApiGalleryReorderMutation`. Public
+  calls keep the resource alone: `useApiPlacesQuery`,
   `useApiPaymentsCreateCheckoutSessionMutation`. A name with no resource plus
   action split keeps its natural shape: `useApiIsAdminQuery`,
   `useApiAdminMeQuery`. This includes auth hooks (`useApiLogoutMutation`, not
@@ -44,7 +47,7 @@ Prefixes carry the meaning, so no name is ambiguous out of context.
   variable always starts with `api`:
 
   ```ts
-  const apiPlaceSaveMutation = useApiPlaceSaveMutation()
+  const apiAdminPlaceSaveMutation = useApiAdminPlaceSaveMutation()
   const apiPlacesQuery = useApiPlacesQuery()
   ```
 

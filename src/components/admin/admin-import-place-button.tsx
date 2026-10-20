@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { isAxiosError } from 'axios'
 import { Upload } from 'lucide-react'
-import { useApiPlaceImportMutation } from '#/api/admin/use-place-import-mutation'
+import { useApiAdminPlaceImportMutation } from '#/api/admin/use-place-import-mutation'
 import type { ApiPlaceExport } from '#/api/admin/types'
 import { Button } from '#/components/ui/button'
 import {
@@ -22,7 +22,7 @@ const INVALID_FILE_MESSAGE =
 
 export const AdminImportPlaceButton: React.FC = () => {
   const navigate = useNavigate()
-  const apiPlaceImportMutation = useApiPlaceImportMutation()
+  const apiAdminPlaceImportMutation = useApiAdminPlaceImportMutation()
   const [error, setError] = useState<string | null>(null)
   const [conflict, setConflict] = useState<{
     payload: ApiPlaceExport
@@ -32,7 +32,7 @@ export const AdminImportPlaceButton: React.FC = () => {
   const runImport = async (payload: ApiPlaceExport) => {
     setError(null)
     try {
-      const created = await apiPlaceImportMutation.mutateAsync(payload)
+      const created = await apiAdminPlaceImportMutation.mutateAsync(payload)
       await navigate({ to: '/admin/place/$id', params: { id: created.id } })
     } catch (caught) {
       if (isAxiosError(caught) && caught.response?.status === 409) {
@@ -59,9 +59,14 @@ export const AdminImportPlaceButton: React.FC = () => {
         onFileAccept={(file) => void handleFile(file)}
       >
         <FileUploadTrigger asChild>
-          <Button variant="outline" disabled={apiPlaceImportMutation.isPending}>
-            {apiPlaceImportMutation.isPending ? <Spinner /> : <Upload />}
-            {apiPlaceImportMutation.isPending ? 'Importing…' : 'Import place'}
+          <Button
+            variant="outline"
+            disabled={apiAdminPlaceImportMutation.isPending}
+          >
+            {apiAdminPlaceImportMutation.isPending ? <Spinner /> : <Upload />}
+            {apiAdminPlaceImportMutation.isPending
+              ? 'Importing…'
+              : 'Import place'}
           </Button>
         </FileUploadTrigger>
       </FileUpload>
@@ -96,7 +101,7 @@ export const AdminImportPlaceButton: React.FC = () => {
               Cancel
             </Button>
             <Button
-              disabled={apiPlaceImportMutation.isPending}
+              disabled={apiAdminPlaceImportMutation.isPending}
               onClick={() => {
                 if (!conflict) return
                 const payload: ApiPlaceExport = {
