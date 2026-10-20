@@ -3,7 +3,7 @@ import { apiClient } from '../client'
 import { apiAdminInvalidatePlaceQueries } from './invalidate-place-queries'
 import type { ApiAdminPlace, ApiAdminPlaceInput } from './types'
 
-export const useApiSavePlaceMutation = () => {
+export const useApiPlaceSaveMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({

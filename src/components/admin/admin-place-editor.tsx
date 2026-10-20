@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Eye } from 'lucide-react'
-import { useApiAdminFetchPlaceExportQuery } from '#/api/admin/use-fetch-place-export-query'
-import { useApiDeletePlaceMutation } from '#/api/admin/use-delete-place-mutation'
-import { useApiSavePlaceMutation } from '#/api/admin/use-save-place-mutation'
-import { useApiUploadBrandImageMutation } from '#/api/admin/use-upload-brand-image-mutation'
+import { Eye, Globe } from 'lucide-react'
+import { useApiAdminPlaceExportFetchQuery } from '#/api/admin/use-place-export-fetch-query'
+import { useApiPlaceDeleteMutation } from '#/api/admin/use-place-delete-mutation'
+import { useApiPlaceSaveMutation } from '#/api/admin/use-place-save-mutation'
+import { useApiBrandImageUploadMutation } from '#/api/admin/use-brand-image-upload-mutation'
 import type { ApiAdminPlace, ApiAdminPlaceInput } from '#/api/admin/types'
 import { AdminConfirmDialog } from '#/components/admin/admin-confirm-dialog'
 import { AdminGalleryEditor } from '#/components/admin/admin-gallery-editor'
@@ -28,10 +28,12 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
   place,
 }) => {
   const navigate = useNavigate()
-  const savePlace = useApiSavePlaceMutation()
-  const deletePlace = useApiDeletePlaceMutation()
-  const uploadBrandImage = useApiUploadBrandImageMutation()
-  const placeExportQuery = useApiAdminFetchPlaceExportQuery(place?.id ?? '')
+  const apiPlaceSaveMutation = useApiPlaceSaveMutation()
+  const apiPlaceDeleteMutation = useApiPlaceDeleteMutation()
+  const apiBrandImageUploadMutation = useApiBrandImageUploadMutation()
+  const apiAdminPlaceExportFetchQuery = useApiAdminPlaceExportFetchQuery(
+    place?.id ?? '',
+  )
   const [form, setForm] = useState<ApiAdminPlaceInput>(() =>
     place ? adminPlaceToPlaceInput(place) : { ...emptyAdminPlaceInput },
   )
@@ -44,7 +46,7 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
   ) => setForm((previous) => ({ ...previous, [key]: value }))
 
   const save = () => {
-    savePlace.mutate(
+    apiPlaceSaveMutation.mutate(
       { place: { ...form, id: form.id.trim().toLowerCase() }, isNew },
       {
         onSuccess: async (saved) => {
@@ -66,30 +68,43 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
   // asks for it and refetch() drives the pending state.
   const exportPlace = async () => {
     if (!place) return
-    const result = await placeExportQuery.refetch()
+    const result = await apiAdminPlaceExportFetchQuery.refetch()
     if (result.data) downloadJsonFile(`${place.id}.stolik.json`, result.data)
   }
 
-  const saveStatus = savePlace.isPending
+  const saveStatus = apiPlaceSaveMutation.isPending
     ? 'Saving…'
-    : savePlace.isError
+    : apiPlaceSaveMutation.isError
       ? 'Could not save.'
-      : savePlace.isSuccess
+      : apiPlaceSaveMutation.isSuccess
         ? 'Saved'
         : null
 
   return (
     <section className="flex flex-col gap-6">
       {place && (
-        <div className="flex justify-center">
+        <div className="flex flex-wrap justify-center gap-2">
           <Button
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary/5"
             nativeButton={false}
             render={<Link to="/admin/preview/$id" params={{ id: place.id }} />}
           >
             <Eye />
-            Preview page
+            Preview draft
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!place.is_published}
+            className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+            title={
+              place.is_published
+                ? undefined
+                : 'Publish the place to open its public page'
+            }
+            nativeButton={false}
+            render={<Link to="/scanned/$id" params={{ id: place.id }} />}
+          >
+            <Globe />
+            Preview published page
           </Button>
         </div>
       )}
@@ -97,33 +112,34 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
       <AdminPlaceForm value={form} isNew={isNew} onChange={setField} />
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={savePlace.isPending} onClick={save}>
-          {savePlace.isPending ? 'Saving…' : 'Save'}
+        <Button disabled={apiPlaceSaveMutation.isPending} onClick={save}>
+          {apiPlaceSaveMutation.isPending ? 'Saving…' : 'Save'}
         </Button>
+        {!isNew && place && (
+          <Button
+            variant="outline"
+            disabled={apiAdminPlaceExportFetchQuery.isFetching}
+            onClick={() => void exportPlace()}
+          >
+            {apiAdminPlaceExportFetchQuery.isFetching ? 'Exporting…' : 'Export'}
+          </Button>
+        )}
         {saveStatus && (
           <span className="text-sm text-muted-foreground">{saveStatus}</span>
         )}
         {!isNew && place && (
-          <div className="ml-auto flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              disabled={placeExportQuery.isFetching}
-              onClick={() => void exportPlace()}
-            >
-              {placeExportQuery.isFetching ? 'Exporting…' : 'Export'}
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={deletePlace.isPending}
-              onClick={() => setDeleteOpen(true)}
-            >
-              Delete place
-            </Button>
-          </div>
+          <Button
+            variant="destructive"
+            className="ml-auto"
+            disabled={apiPlaceDeleteMutation.isPending}
+            onClick={() => setDeleteOpen(true)}
+          >
+            Delete place
+          </Button>
         )}
       </div>
 
-      {placeExportQuery.isError && (
+      {apiAdminPlaceExportFetchQuery.isError && (
         <p className="text-sm text-destructive">Export failed.</p>
       )}
 
@@ -135,10 +151,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
             <AdminImageSlot
               label="Logo"
               imageUrl={place.logo_url}
-              isUploading={uploadBrandImage.isPending}
+              isUploading={apiBrandImageUploadMutation.isPending}
               onPreview={setPreviewUrl}
               onUpload={(file) =>
-                uploadBrandImage.mutate({
+                apiBrandImageUploadMutation.mutate({
                   placeId: place.id,
                   kind: 'logo',
                   file,
@@ -148,10 +164,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
             <AdminImageSlot
               label="Background"
               imageUrl={place.background_url}
-              isUploading={uploadBrandImage.isPending}
+              isUploading={apiBrandImageUploadMutation.isPending}
               onPreview={setPreviewUrl}
               onUpload={(file) =>
-                uploadBrandImage.mutate({
+                apiBrandImageUploadMutation.mutate({
                   placeId: place.id,
                   kind: 'background',
                   file,
@@ -171,10 +187,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
         title="Delete this place?"
         description="The place and all of its photos are gone. This cannot be undone."
         confirmLabel="Delete place"
-        isPending={deletePlace.isPending}
+        isPending={apiPlaceDeleteMutation.isPending}
         onConfirm={() => {
           if (!place) return
-          deletePlace.mutate(place.id, {
+          apiPlaceDeleteMutation.mutate(place.id, {
             onSuccess: () => void navigate({ to: '/admin' }),
           })
         }}

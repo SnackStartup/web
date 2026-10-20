@@ -30,16 +30,26 @@ Prefixes carry the meaning, so no name is ambiguous out of context.
   ```
 
 - Every API call is a TanStack Query hook, never a plain fetch function. Hooks
-  start with `useApi`: `useApiAdminPlacesQuery`, `useApiIsAdminQuery`,
-  `useApiSavePlaceMutation`. This includes auth hooks (`useApiLogoutMutation`,
-  not `useLogoutMutation`).
+  start with `useApi` and read as `<resource><action>`:
+  `useApiPlaceSaveMutation`, `useApiGalleryReorderMutation`,
+  `useApiPaymentsCreateCheckoutSessionMutation`. A name with no resource plus
+  action split keeps its natural shape: `useApiIsAdminQuery`,
+  `useApiAdminMeQuery`. This includes auth hooks (`useApiLogoutMutation`, not
+  `useLogoutMutation`).
 - Helper exports that act on the cache take the full prefix:
   `apiAdminInvalidatePlaceQueries`.
 - One `useQuery` per hook, written inline. Do not split a `queryOptions`
   factory out of a hook.
-- Query results and mutations are assigned to variables named after what they
-  load, not `query` or `data`: `adminPlacesQuery`, `adminPlaceQuery`,
-  `apiIsAdminQuery`, `savePlace`, `logoutMutation`.
+- A query or mutation result is assigned to the hook name without `use`, so the
+  variable always starts with `api`:
+
+  ```ts
+  const apiPlaceSaveMutation = useApiPlaceSaveMutation()
+  const apiPlacesQuery = useApiPlacesQuery()
+  ```
+
+  Never `savePlace`, `placesQuery`, `query` or `data`.
+
 - On-demand reads (a button that fetches on click) are still queries: render
   them with `enabled: false` and drive them with `refetch()`, never with a
   hand-rolled `isExporting` boolean.
@@ -83,6 +93,10 @@ invalidate-place-queries.ts         apiAdminInvalidatePlaceQueries
   form because one request is in flight.
 - The enlarged-image viewer is `src/components/image-lightbox.tsx`. The guest
   gallery and every admin panel use that one component.
+- The admin-only way back into the panel is `AdminLink`
+  (`src/components/admin/admin-link.tsx`), used by the header and the guest page.
+  It stays small: red fill, no bold or uppercase, trailing arrow. A red badge
+  with loud type is too much for guest-facing chrome.
 
 ## Environment and data
 

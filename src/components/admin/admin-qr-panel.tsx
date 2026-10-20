@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useApiAdminFetchQrBlobQuery } from '#/api/admin/use-fetch-qr-blob-query'
+import { useApiAdminQrBlobFetchQuery } from '#/api/admin/use-qr-blob-fetch-query'
 import { Button } from '#/components/ui/button'
 import { Spinner } from '#/components/ui/spinner'
 
@@ -12,25 +12,25 @@ export const AdminQrPanel: React.FC<AdminQrPanelProps> = ({
   placeId,
   onPreview,
 }) => {
-  const qrBlobQuery = useApiAdminFetchQrBlobQuery(placeId)
+  const apiAdminQrBlobFetchQuery = useApiAdminQrBlobFetchQuery(placeId)
   const [qrUrl, setQrUrl] = useState<string | null>(null)
 
   // The blob comes from the query cache; the object URL is the component's to
   // own, so it is created and revoked here.
   useEffect(() => {
-    if (!qrBlobQuery.data) {
+    if (!apiAdminQrBlobFetchQuery.data) {
       setQrUrl(null)
       return
     }
-    const objectUrl = URL.createObjectURL(qrBlobQuery.data)
+    const objectUrl = URL.createObjectURL(apiAdminQrBlobFetchQuery.data)
     setQrUrl(objectUrl)
     return () => URL.revokeObjectURL(objectUrl)
-  }, [qrBlobQuery.data])
+  }, [apiAdminQrBlobFetchQuery.data])
 
   return (
     <div className="flex flex-col gap-3">
       <h2 className="font-semibold">QR code</h2>
-      {qrBlobQuery.isError && (
+      {apiAdminQrBlobFetchQuery.isError && (
         <p className="text-sm text-destructive">Could not load the QR code.</p>
       )}
       {qrUrl ? (
@@ -53,7 +53,7 @@ export const AdminQrPanel: React.FC<AdminQrPanelProps> = ({
           </Button>
         </>
       ) : (
-        qrBlobQuery.isPending && <Spinner />
+        apiAdminQrBlobFetchQuery.isPending && <Spinner />
       )}
     </div>
   )

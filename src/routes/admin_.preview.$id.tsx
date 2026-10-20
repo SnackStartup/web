@@ -16,10 +16,10 @@ export const Route = createFileRoute('/admin_/preview/$id')({
 function RouteComponent() {
   const { id } = Route.useParams()
   const hasToken = Boolean(getAccessToken())
-  const isAdminQuery = useApiIsAdminQuery()
-  const adminPlaceQuery = useApiAdminPlaceQuery(hasToken ? id : '')
+  const apiIsAdminQuery = useApiIsAdminQuery()
+  const apiAdminPlaceQuery = useApiAdminPlaceQuery(hasToken ? id : '')
 
-  if (!hasToken || isAdminQuery.isError) {
+  if (!hasToken || apiIsAdminQuery.isError) {
     return (
       <Page className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-sm text-muted-foreground">
@@ -32,7 +32,7 @@ function RouteComponent() {
     )
   }
 
-  if (isAdminQuery.isPending || adminPlaceQuery.isPending) {
+  if (apiIsAdminQuery.isPending || apiAdminPlaceQuery.isPending) {
     return (
       <Page className="flex min-h-screen items-center justify-center">
         <Spinner className="size-12" />
@@ -40,7 +40,7 @@ function RouteComponent() {
     )
   }
 
-  if (!adminPlaceQuery.data) {
+  if (!apiAdminPlaceQuery.data) {
     return (
       <Page className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-sm text-muted-foreground">Place not found.</p>
@@ -53,7 +53,7 @@ function RouteComponent() {
 
   return (
     <PlaceView
-      place={adminPlaceToApiPlace(adminPlaceQuery.data)}
+      place={adminPlaceToApiPlace(apiAdminPlaceQuery.data)}
       placeId={id}
       preview
     />

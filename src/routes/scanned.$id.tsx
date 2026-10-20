@@ -11,17 +11,17 @@ export const Route = createFileRoute('/scanned/$id')({
 
 function RouteComponent() {
   const { id: placeId } = Route.useParams()
-  const placeQuery = useApiPlaceQuery(placeId)
-  const place = placeQuery.data
+  const apiPlaceQuery = useApiPlaceQuery(placeId)
+  const place = apiPlaceQuery.data
 
-  if (placeQuery.isPending) {
+  if (apiPlaceQuery.isPending) {
     return (
       <Page className="flex min-h-screen items-center justify-center">
         <Spinner className="size-12" />
       </Page>
     )
   }
-  if (placeQuery.isError || !place) {
+  if (apiPlaceQuery.isError || !place) {
     return <NotFoundComponent />
   }
 
@@ -29,7 +29,7 @@ function RouteComponent() {
     <PlaceView
       place={place}
       placeId={placeId}
-      onPlaceRefetch={() => void placeQuery.refetch()}
+      onPlaceRefetch={() => void apiPlaceQuery.refetch()}
     />
   )
 }

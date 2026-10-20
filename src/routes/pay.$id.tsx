@@ -42,12 +42,13 @@ function RouteComponent() {
   const { mode: searchMode } = Route.useSearch()
   const navigate = useNavigate()
   const [mode, setMode] = useState<PaymentMode>(searchMode)
-  const apiCreateSessionMutation = useApiPaymentsCreateCheckoutSessionMutation()
+  const apiPaymentsCreateCheckoutSessionMutation =
+    useApiPaymentsCreateCheckoutSessionMutation()
 
-  const placeId = apiCreateSessionMutation.data?.place_id ?? ''
-  const placeQuery = useApiPlaceQuery(placeId)
-  const place = placeQuery.data
-  const plan = apiCreateSessionMutation.data?.plan
+  const placeId = apiPaymentsCreateCheckoutSessionMutation.data?.place_id ?? ''
+  const apiPlaceQuery = useApiPlaceQuery(placeId)
+  const place = apiPlaceQuery.data
+  const plan = apiPaymentsCreateCheckoutSessionMutation.data?.plan
   const isOneTime = plan?.type === 'one_time'
   const priceLabel = plan
     ? new Intl.NumberFormat('pl-PL', {
@@ -58,8 +59,8 @@ function RouteComponent() {
   const periodLabel = plan?.interval === 'year' ? 'rok' : 'miesiąc'
 
   useEffect(() => {
-    apiCreateSessionMutation.reset() // drop stale client_secret when mode changes
-    apiCreateSessionMutation.mutate({ token, mode })
+    apiPaymentsCreateCheckoutSessionMutation.reset() // drop stale client_secret when mode changes
+    apiPaymentsCreateCheckoutSessionMutation.mutate({ token, mode })
   }, [token, mode])
 
   const handleModeChange = (next: PaymentMode) => {
@@ -68,7 +69,7 @@ function RouteComponent() {
     navigate({ to: '/pay/$id', params: { id: token }, search: { mode: next } })
   }
 
-  if (apiCreateSessionMutation.isPending) {
+  if (apiPaymentsCreateCheckoutSessionMutation.isPending) {
     return (
       <Page className="flex min-h-screen items-center justify-center">
         <Spinner className="size-12" />
@@ -76,7 +77,7 @@ function RouteComponent() {
     )
   }
 
-  if (apiCreateSessionMutation.isError) {
+  if (apiPaymentsCreateCheckoutSessionMutation.isError) {
     return (
       <Page className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <p role="alert" className="text-sm text-destructive">
@@ -84,7 +85,9 @@ function RouteComponent() {
         </p>
         <Button
           variant="outline"
-          onClick={() => apiCreateSessionMutation.mutate({ token, mode })}
+          onClick={() =>
+            apiPaymentsCreateCheckoutSessionMutation.mutate({ token, mode })
+          }
         >
           Spróbuj ponownie
         </Button>
@@ -92,18 +95,19 @@ function RouteComponent() {
     )
   }
 
-  if (placeId && placeQuery.isPending) {
+  if (placeId && apiPlaceQuery.isPending) {
     return (
       <Page className="flex min-h-screen items-center justify-center">
         <Spinner className="size-12" />
       </Page>
     )
   }
-  if (placeQuery.isError || !place) {
+  if (apiPlaceQuery.isError || !place) {
     return <NotFoundComponent />
   }
 
-  const clientSecret = apiCreateSessionMutation.data?.client_secret
+  const clientSecret =
+    apiPaymentsCreateCheckoutSessionMutation.data?.client_secret
 
   return (
     <Page
@@ -140,7 +144,7 @@ function RouteComponent() {
             <Button
               variant={mode === 'subscription' ? 'default' : 'outline'}
               className="flex-1"
-              disabled={apiCreateSessionMutation.isPending}
+              disabled={apiPaymentsCreateCheckoutSessionMutation.isPending}
               onClick={() => handleModeChange('subscription')}
             >
               Subskrypcja
@@ -148,7 +152,7 @@ function RouteComponent() {
             <Button
               variant={mode === 'payment' ? 'default' : 'outline'}
               className="flex-1"
-              disabled={apiCreateSessionMutation.isPending}
+              disabled={apiPaymentsCreateCheckoutSessionMutation.isPending}
               onClick={() => handleModeChange('payment')}
             >
               Jednorazowo

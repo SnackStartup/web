@@ -6,7 +6,7 @@ export type ApiQrFormat = 'png' | 'svg'
 
 // The QR encodes the place slug and the public web URL, so it stays fresh for
 // as long as the place itself does.
-export const useApiAdminFetchQrBlobQuery = (
+export const useApiAdminQrBlobFetchQuery = (
   placeId: string,
   format: ApiQrFormat = 'png',
 ) =>

@@ -17,17 +17,17 @@ export const Route = createFileRoute('/payed')({
 function RouteComponent() {
   const { session_id } = Route.useSearch()
   const navigate = useNavigate()
-  const apiCheckoutSessionQuery =
+  const apiPaymentsRetrieveCheckoutSessionQuery =
     useApiPaymentsRetrieveCheckoutSessionQuery(session_id)
-  const placeId = apiCheckoutSessionQuery.data?.place_id ?? ''
-  const placeQuery = useApiPlaceQuery(placeId)
-  const place = placeQuery.data
+  const placeId = apiPaymentsRetrieveCheckoutSessionQuery.data?.place_id ?? ''
+  const apiPlaceQuery = useApiPlaceQuery(placeId)
+  const place = apiPlaceQuery.data
 
   useEffect(() => {
     if (!session_id) navigate({ to: '/' })
   }, [session_id, navigate])
 
-  if (apiCheckoutSessionQuery.isPending) {
+  if (apiPaymentsRetrieveCheckoutSessionQuery.isPending) {
     return (
       <Page className="flex min-h-screen items-center justify-center">
         <Spinner className="size-12" />
@@ -35,7 +35,7 @@ function RouteComponent() {
     )
   }
 
-  if (apiCheckoutSessionQuery.isError) {
+  if (apiPaymentsRetrieveCheckoutSessionQuery.isError) {
     return (
       <Page className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-destructive">Nie udało się potwierdzić płatności.</p>

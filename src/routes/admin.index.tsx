@@ -10,7 +10,7 @@ export const Route = createFileRoute('/admin/')({
 })
 
 function AdminPlacesPage() {
-  const adminPlacesQuery = useApiAdminPlacesQuery()
+  const apiAdminPlacesQuery = useApiAdminPlacesQuery()
 
   return (
     <section className="flex flex-col gap-4">
@@ -32,14 +32,14 @@ function AdminPlacesPage() {
         between environments (e.g. staging → prod).
       </p>
 
-      {adminPlacesQuery.isLoading && <Spinner />}
+      {apiAdminPlacesQuery.isLoading && <Spinner />}
 
-      {adminPlacesQuery.data?.length === 0 && (
+      {apiAdminPlacesQuery.data?.length === 0 && (
         <p className="text-sm text-muted-foreground">No places yet.</p>
       )}
 
       <ul className="flex flex-col divide-y rounded-md border">
-        {adminPlacesQuery.data?.map((place) => (
+        {apiAdminPlacesQuery.data?.map((place) => (
           <li key={place.id}>
             <Link
               to="/admin/place/$id"

@@ -10,14 +10,14 @@ export const Route = createFileRoute('/admin/place/$id')({
 function RouteComponent() {
   const { id } = Route.useParams()
   const isNew = id === 'new'
-  const adminPlaceQuery = useApiAdminPlaceQuery(isNew ? '' : id)
+  const apiAdminPlaceQuery = useApiAdminPlaceQuery(isNew ? '' : id)
 
-  if (!isNew && adminPlaceQuery.isLoading) return <Spinner />
-  if (!isNew && !adminPlaceQuery.data) {
+  if (!isNew && apiAdminPlaceQuery.isLoading) return <Spinner />
+  if (!isNew && !apiAdminPlaceQuery.data) {
     return <p className="text-sm text-muted-foreground">Place not found.</p>
   }
 
   return (
-    <AdminPlaceEditor key={id} isNew={isNew} place={adminPlaceQuery.data} />
+    <AdminPlaceEditor key={id} isNew={isNew} place={apiAdminPlaceQuery.data} />
   )
 }

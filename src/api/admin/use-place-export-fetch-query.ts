@@ -5,7 +5,7 @@ import type { ApiPlaceExport } from './types'
 
 // Export is an on-demand read: the editor renders the query disabled and calls
 // refetch() when the button is pressed, so the payload is cached per place.
-export const useApiAdminFetchPlaceExportQuery = (
+export const useApiAdminPlaceExportFetchQuery = (
   placeId: string,
   enabled = false,
 ) =>

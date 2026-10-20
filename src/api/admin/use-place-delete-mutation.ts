@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../client'
 import { adminKeys, placeKeys } from '../query-keys'
 
-export const useApiDeletePlaceMutation = () => {
+export const useApiPlaceDeleteMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (placeId: string) => {

@@ -3,19 +3,21 @@ import { apiClient } from '../client'
 import { apiAdminInvalidatePlaceQueries } from './invalidate-place-queries'
 import type { ApiAdminImage } from './types'
 
-export const useApiReorderGalleryMutation = () => {
+export const useApiGalleryImagesUploadMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({
       placeId,
-      imageIds,
+      files,
     }: {
       placeId: string
-      imageIds: string[]
+      files: File[]
     }) => {
-      const { data } = await apiClient.put<ApiAdminImage[]>(
-        `/admin/places/${placeId}/gallery/order`,
-        { ids: imageIds },
+      const form = new FormData()
+      files.forEach((file) => form.append('files', file))
+      const { data } = await apiClient.post<ApiAdminImage[]>(
+        `/admin/places/${placeId}/gallery`,
+        form,
       )
       return data
     },

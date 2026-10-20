@@ -3,7 +3,7 @@ import { apiClient } from '../client'
 import { adminKeys } from '../query-keys'
 import type { ApiAdminPlace, ApiPlaceExport } from './types'
 
-export const useApiImportPlaceMutation = () => {
+export const useApiPlaceImportMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: ApiPlaceExport) =>

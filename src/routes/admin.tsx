@@ -23,15 +23,15 @@ export const Route = createFileRoute('/admin')({
 
 function AdminLayout() {
   const queryClient = useQueryClient()
-  const adminMeQuery = useApiAdminMeQuery()
-  const googleAuthMutation = useApiGoogleAuthMutation()
-  const logoutMutation = useApiLogoutMutation()
+  const apiAdminMeQuery = useApiAdminMeQuery()
+  const apiGoogleAuthMutation = useApiGoogleAuthMutation()
+  const apiLogoutMutation = useApiLogoutMutation()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
   const isPlaceEditor = pathname.startsWith('/admin/place')
 
-  if (adminMeQuery.isLoading) {
+  if (apiAdminMeQuery.isLoading) {
     return (
       <main className="grid min-h-dvh place-items-center">
         <Spinner />
@@ -39,9 +39,9 @@ function AdminLayout() {
     )
   }
 
-  if (!adminMeQuery.data) {
-    const status = isAxiosError(adminMeQuery.error)
-      ? adminMeQuery.error.response?.status
+  if (!apiAdminMeQuery.data) {
+    const status = isAxiosError(apiAdminMeQuery.error)
+      ? apiAdminMeQuery.error.response?.status
       : undefined
 
     return (
@@ -59,7 +59,7 @@ function AdminLayout() {
             <GoogleLogin
               onSuccess={async (response) => {
                 if (!response.credential) return
-                await googleAuthMutation.mutateAsync({
+                await apiGoogleAuthMutation.mutateAsync({
                   idToken: response.credential,
                 })
                 await queryClient.invalidateQueries({
@@ -122,15 +122,15 @@ function AdminLayout() {
           </div>
           <div className="flex min-w-0 max-w-full items-center gap-3">
             <span className="truncate text-xs text-muted-foreground">
-              {adminMeQuery.data.email}
+              {apiAdminMeQuery.data.email}
             </span>
             <Button
               variant="outline"
               size="sm"
-              disabled={logoutMutation.isPending}
-              onClick={() => logoutMutation.mutate()}
+              disabled={apiLogoutMutation.isPending}
+              onClick={() => apiLogoutMutation.mutate()}
             >
-              {logoutMutation.isPending ? 'Signing out…' : 'Sign out'}
+              {apiLogoutMutation.isPending ? 'Signing out…' : 'Sign out'}
             </Button>
           </div>
         </div>

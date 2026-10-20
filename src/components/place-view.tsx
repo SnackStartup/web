@@ -16,6 +16,7 @@ import type { FreeCoffeeReason } from '#/api/photos/use-upload-mutation'
 import { ThanksScreen } from '#/components/thanks-screen'
 import { CarouselGallery } from '#/components/carousel-gallery'
 import type { GalleryImage } from '#/components/carousel-gallery'
+import { AdminLink } from '#/components/admin/admin-link'
 import { Separator } from '#/components/ui/separator'
 import { Button, buttonVariants } from '#/components/ui/button'
 import { Spinner } from '#/components/ui/spinner'
@@ -57,7 +58,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
     new Map(),
   )
   const isUploadingDisabled = selectedFiles.length === 0 || isUploading
-  const placesQuery = useApiPlacesQuery()
+  const apiPlacesQuery = useApiPlacesQuery()
   const apiIsAdminQuery = useApiIsAdminQuery()
   const placeProps = { place_id: placeId, place_name: place.name }
   const galleryImages: GalleryImage[] = place.gallery.map((image) => ({
@@ -261,7 +262,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
     if (taps >= 3) {
       clientTapTimesRef.current = []
       setShowCoffeeCounter(false)
-      const ids = placesQuery.data?.map((p) => p.id) ?? []
+      const ids = apiPlacesQuery.data?.map((p) => p.id) ?? []
       if (ids.length === 0) return
       const currentIndex = ids.indexOf(placeId)
       navigate({
@@ -401,13 +402,9 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
               />
             </div>
             {!preview && apiIsAdminQuery.isSuccess && (
-              <Link
-                to="/admin/place/$id"
-                params={{ id: placeId }}
-                className="rounded bg-red-600 px-2.5 py-1 text-xs font-bold tracking-wide text-white uppercase"
-              >
-                Admin
-              </Link>
+              <AdminLink
+                render={<Link to="/admin/place/$id" params={{ id: placeId }} />}
+              />
             )}
           </div>
         </div>
