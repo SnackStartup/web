@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { CheckoutElementsProvider } from '@stripe/react-stripe-js/checkout'
 import { loadStripe } from '@stripe/stripe-js'
 import type { Stripe } from '@stripe/stripe-js'
-import { useApiPaymentsCreateCheckoutSessionMutation } from '#/api/payments/use-api-payments-create-checkout-session-mutation'
+import { useApiPaymentsCreateCheckoutSessionMutation } from '#/api/payments/use-create-checkout-session-mutation'
 import type { PaymentMode } from '#/api/payments/types'
 import { useEffect, useState } from 'react'
 import CheckoutForm from '#/components/checkout-form'
@@ -11,7 +11,7 @@ import { Spinner } from '#/components/ui/spinner'
 import { Button } from '#/components/ui/button'
 import { NotFoundComponent } from '#/components/not-found-component'
 import { CheckCircle2Icon, ShieldCheckIcon } from 'lucide-react'
-import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
+import { useApiPlaceQuery } from '#/api/places/use-place-query'
 
 export const Route = createFileRoute('/pay/$id')({
   validateSearch: (search: Record<string, unknown>) => ({

@@ -3,7 +3,7 @@ import { FaHeart, FaMugHot, FaInstagram, FaXmark, FaEye } from 'react-icons/fa6'
 
 import './thanks-screen.css'
 import { cn } from '#/lib/utils'
-import type { FreeCoffeeReason } from '#/api/photos/use-api-photos-upload-mutation'
+import type { FreeCoffeeReason } from '#/api/photos/use-upload-mutation'
 import { GoogleLogin } from '@react-oauth/google'
 import { Spinner } from './ui/spinner'
 

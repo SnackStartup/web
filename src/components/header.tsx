@@ -2,7 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { MenuIcon, XIcon, ArrowRightIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '#/components/ui/button'
-import { useIsAdminQuery } from '#/api/admin/use-is-admin-query'
+import { Badge } from '#/components/ui/badge'
+import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
 
 const navLinks = [
   { label: 'Jak to działa', href: '#jak-to-dziala' },
@@ -12,7 +13,7 @@ const navLinks = [
 
 export const Header: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const isAdminQuery = useIsAdminQuery()
+  const apiIsAdminQuery = useApiIsAdminQuery()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-lg">
@@ -35,19 +36,23 @@ export const Header: React.FC = () => {
                 {link.label}
               </a>
             ))}
-            <Button size="sm" render={<a href="#kontakt" />}>
+            <Button
+              size="sm"
+              nativeButton={false}
+              render={<a href="#kontakt" />}
+            >
               Skontaktuj się
               <ArrowRightIcon data-icon="inline-end" />
             </Button>
           </nav>
 
-          {isAdminQuery.isSuccess && (
-            <Link
-              to="/admin"
-              className="rounded bg-red-600 px-2.5 py-1 text-xs font-bold tracking-wide text-white uppercase"
+          {apiIsAdminQuery.isSuccess && (
+            <Badge
+              className="bg-red-600 px-2.5 py-1 font-bold tracking-wide text-white uppercase"
+              render={<Link to="/admin" />}
             >
               Admin
-            </Link>
+            </Badge>
           )}
 
           {/* Mobile menu button */}
@@ -81,6 +86,7 @@ export const Header: React.FC = () => {
             ))}
             <Button
               className="mt-2"
+              nativeButton={false}
               render={
                 <a href="#kontakt" onClick={() => setMobileOpen(false)} />
               }

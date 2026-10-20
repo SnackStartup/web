@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '../client'
-import type { UploadResponse } from '../photos/use-api-photos-upload-mutation'
+import type { UploadResponse } from '../photos/use-upload-mutation'
 
 export const useApiClaimMutation = () => {
   return useMutation({

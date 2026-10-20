@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { FreeCoffeeReason } from '#/api/photos/use-api-photos-upload-mutation'
+import type { FreeCoffeeReason } from '#/api/photos/use-upload-mutation'
 
 export const THANKS_TTL_MS = 30 * 60 * 1000 // 30m
 

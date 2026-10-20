@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { CheckCircle2Icon, ShieldCheckIcon } from 'lucide-react'
 import { useEffect } from 'react'
-import { useApiPaymentsRetrieveCheckoutSessionQuery } from '#/api/payments/use-api-payments-retrieve-checkout-session-query'
+import { useApiPaymentsRetrieveCheckoutSessionQuery } from '#/api/payments/use-retrieve-checkout-session-query'
 import { Page } from '#/components/page'
 import { Spinner } from '#/components/ui/spinner'
 import { Button } from '#/components/ui/button'
-import { useApiPlaceQuery } from '#/api/places/use-api-place-query'
+import { useApiPlaceQuery } from '#/api/places/use-place-query'
 
 export const Route = createFileRoute('/payed')({
   validateSearch: (search: Record<string, unknown>) => ({

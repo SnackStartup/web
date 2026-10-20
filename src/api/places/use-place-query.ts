@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../client'
+import { placeKeys } from '../query-keys'
 import type { ApiPlace } from './types'
 
 export const useApiPlaceQuery = (placeId: string) => {
   return useQuery({
-    queryKey: ['place', placeId],
+    queryKey: placeKeys.detail(placeId),
     queryFn: async () => {
       const { data } = await apiClient.get<ApiPlace>(`/places/${placeId}`)
       return data

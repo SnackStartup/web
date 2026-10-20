@@ -11,22 +11,22 @@ import {
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
 import { Share2Icon, StarIcon } from 'lucide-react'
-import { useApiPhotosUploadMutation } from '#/api/photos/use-api-photos-upload-mutation'
-import type { FreeCoffeeReason } from '#/api/photos/use-api-photos-upload-mutation'
+import { useApiPhotosUploadMutation } from '#/api/photos/use-upload-mutation'
+import type { FreeCoffeeReason } from '#/api/photos/use-upload-mutation'
 import { ThanksScreen } from '#/components/thanks-screen'
 import { CarouselGallery } from '#/components/carousel-gallery'
 import type { GalleryImage } from '#/components/carousel-gallery'
 import { Separator } from '#/components/ui/separator'
-import { Button } from '#/components/ui/button'
+import { Button, buttonVariants } from '#/components/ui/button'
 import { Spinner } from '#/components/ui/spinner'
 import { analyticsCapture } from '#/lib/analytics'
 import { HighlightedText } from '#/components/highlighted-text'
 import { Page } from '#/components/page'
-import { useApiPlacesQuery } from '#/api/places/use-api-places-query'
+import { useApiPlacesQuery } from '#/api/places/use-places-query'
 import type { ApiPlace } from '#/api/places/types'
-import { useApiClaimMutation } from '#/api/auth/use-api-claim-mutation'
-import { useApiGoogleAuthMutation } from '#/api/auth/use-api-google-auth-mutation'
-import { useIsAdminQuery } from '#/api/admin/use-is-admin-query'
+import { useApiClaimMutation } from '#/api/auth/use-claim-mutation'
+import { useApiGoogleAuthMutation } from '#/api/auth/use-google-auth-mutation'
+import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
 import { useThanksStore, THANKS_TTL_MS } from '#/lib/thanks-store'
 import { cn } from '#/lib/utils'
 
@@ -58,9 +58,10 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
   )
   const isUploadingDisabled = selectedFiles.length === 0 || isUploading
   const placesQuery = useApiPlacesQuery()
-  const isAdminQuery = useIsAdminQuery()
+  const apiIsAdminQuery = useApiIsAdminQuery()
   const placeProps = { place_id: placeId, place_name: place.name }
   const galleryImages: GalleryImage[] = place.gallery.map((image) => ({
+    id: image.id,
     tile: image.tile_url,
     full: image.full_url,
   }))
@@ -399,7 +400,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
                 }
               />
             </div>
-            {!preview && isAdminQuery.isSuccess && (
+            {!preview && apiIsAdminQuery.isSuccess && (
               <Link
                 to="/admin/place/$id"
                 params={{ id: placeId }}
@@ -427,42 +428,42 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
             ))}
           </Rating>
           <div className="flex flex-row gap-4 items-center">
-            <Button
-              size="sm"
-              className="p-0"
-              variant="ghost"
-              disabled={preview}
-              onClick={handleInstagramButtonClicked}
-              render={
-                preview ? undefined : (
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={place.instagram_url}
-                  />
-                )
-              }
-            >
-              <FaInstagram className="size-5" />
-            </Button>
-            <Button
-              size="sm"
-              className="p-0"
-              variant="ghost"
-              disabled={preview}
-              onClick={handleFacebookButtonClicked}
-              render={
-                preview ? undefined : (
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={place.facebook_url}
-                  />
-                )
-              }
-            >
-              <FaFacebook className="size-5" />
-            </Button>
+            {preview ? (
+              <Button size="sm" className="p-0" variant="ghost" disabled>
+                <FaInstagram className="size-5" />
+              </Button>
+            ) : (
+              <a
+                href={place.instagram_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ variant: 'ghost', size: 'sm' }),
+                  'p-0',
+                )}
+                onClick={handleInstagramButtonClicked}
+              >
+                <FaInstagram className="size-5" />
+              </a>
+            )}
+            {preview ? (
+              <Button size="sm" className="p-0" variant="ghost" disabled>
+                <FaFacebook className="size-5" />
+              </Button>
+            ) : (
+              <a
+                href={place.facebook_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ variant: 'ghost', size: 'sm' }),
+                  'p-0',
+                )}
+                onClick={handleFacebookButtonClicked}
+              >
+                <FaFacebook className="size-5" />
+              </a>
+            )}
             <Button
               size="sm"
               className="p-0"
