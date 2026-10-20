@@ -4,7 +4,6 @@ import { FaHeart, FaMugHot, FaInstagram, FaXmark, FaEye } from 'react-icons/fa6'
 import './thanks-screen.css'
 import { cn } from '#/lib/utils'
 import type { FreeCoffeeReason } from '#/api/photos/use-api-photos-upload-mutation'
-import { Page } from './page'
 import { GoogleLogin } from '@react-oauth/google'
 import { Spinner } from './ui/spinner'
 
@@ -74,14 +73,16 @@ export const ThanksScreen: React.FC<Props> = ({
           : 'opacity-0 pointer-events-none',
       )}
     >
-      <img
-        src={backgroundUri}
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        alt=""
-        style={{
-          opacity: backgroundOpacity,
-        }}
-      />
+      {backgroundUri && (
+        <img
+          src={backgroundUri}
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          alt=""
+          style={{
+            opacity: backgroundOpacity,
+          }}
+        />
+      )}
       <div className="relative z-10 flex flex-col items-center justify-center gap-2 h-full p-8">
         {visible && (
           <button

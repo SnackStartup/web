@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { MenuIcon, XIcon, ArrowRightIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '#/components/ui/button'
-import { cn } from '#/lib/utils'
+import { useIsAdminQuery } from '#/api/admin/use-is-admin-query'
 
 const navLinks = [
   { label: 'Jak to działa', href: '#jak-to-dziala' },
@@ -12,6 +12,7 @@ const navLinks = [
 
 export const Header: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const isAdminQuery = useIsAdminQuery()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-lg">
@@ -22,35 +23,46 @@ export const Header: React.FC = () => {
           <span className="text-lg font-bold">Stolik</span>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </a>
-          ))}
-          <Button size="sm" render={<a href="#kontakt" />}>
-            Skontaktuj się
-            <ArrowRightIcon data-icon="inline-end" />
-          </Button>
-        </nav>
+        <div className="flex items-center gap-2">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            ))}
+            <Button size="sm" render={<a href="#kontakt" />}>
+              Skontaktuj się
+              <ArrowRightIcon data-icon="inline-end" />
+            </Button>
+          </nav>
 
-        {/* Mobile menu button */}
-        <button
-          className="flex size-9 items-center justify-center rounded-md transition-colors hover:bg-muted md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? 'Zamknij menu' : 'Otwórz menu'}
-        >
-          {mobileOpen ? (
-            <XIcon className="size-5" />
-          ) : (
-            <MenuIcon className="size-5" />
+          {isAdminQuery.isSuccess && (
+            <Link
+              to="/admin"
+              className="rounded bg-red-600 px-2.5 py-1 text-xs font-bold tracking-wide text-white uppercase"
+            >
+              Admin
+            </Link>
           )}
-        </button>
+
+          {/* Mobile menu button */}
+          <button
+            className="flex size-9 items-center justify-center rounded-md transition-colors hover:bg-muted md:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Zamknij menu' : 'Otwórz menu'}
+          >
+            {mobileOpen ? (
+              <XIcon className="size-5" />
+            ) : (
+              <MenuIcon className="size-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile nav */}

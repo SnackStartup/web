@@ -113,11 +113,13 @@ function RouteComponent() {
       <div className="mx-auto flex w-full max-w-md flex-col gap-6">
         {/* Place header */}
         <div className="flex flex-row items-center gap-3">
-          <img
-            src={`/places/${placeId}/logo-96.webp`}
-            alt={place.name}
-            className="size-12 rounded-full object-cover aspect-square"
-          />
+          {place.logo_url && (
+            <img
+              src={place.logo_url}
+              alt={place.name}
+              className="size-12 rounded-full object-cover aspect-square"
+            />
+          )}
           <div className="flex flex-col">
             {place.suffix && (
               <span className="text-xs text-neutral-500">{place.suffix}</span>
