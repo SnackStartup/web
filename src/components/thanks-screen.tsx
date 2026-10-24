@@ -113,7 +113,7 @@ export const ThanksScreen: React.FC<Props> = ({
         <h2 className="text-neutral-400 text-center">
           {coffeeMessage ?? 'Zgłoszenie zostało przyjęte'}
         </h2>
-        {(!coffeeInfo || verifyingCoffee) && (
+        {visible && (!coffeeInfo || verifyingCoffee) && (
           <div className="mt-6 flex w-full max-w-sm flex-col gap-3 items-center">
             <GoogleLogin
               theme="outline"
