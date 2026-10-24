@@ -12,6 +12,7 @@
     "ngrok": "ngrok http https://localhost:3000 --url https://rework-regain-prong.ngrok-free.dev --traffic-policy-file ngrok/policy.yaml",
     "generate-routes": "tsr generate",
     "build": "vite build",
+    "build:staging": "vite build --mode staging",
     "preview": "vite preview",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
