@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
         {/* Logo, with the admin shortcut sitting to its right */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/icon-96.png" alt="Stolik" className="size-8" />
+            <img src="/logo.svg" alt="Stolik" className="size-8" />
             <span className="text-lg font-bold">Stolik</span>
           </Link>
           {apiIsAdminQuery.isSuccess && (

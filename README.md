@@ -49,3 +49,8 @@ ngrok http https://localhost:3000 --url https://rework-regain-prong.ngrok-free.d
 ```
 NODE_EXTRA_CA_CERTS=\"$(pwd)/public/rootCA.pem\" vite build --mode development && vite preview --host 0.0.0.0
 ```
+
+```
+adb reverse tcp:8000 tcp:8000
+adb reverse tcp:3000 tcp:3000
+```

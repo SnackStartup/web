@@ -45,7 +45,11 @@ export default defineConfig(({ command, mode }) => {
           display: 'standalone',
           theme_color: '#d33886',
           background_color: '#ffffff',
-          icons: [{ src: '/icon-96.png', sizes: '96x96', type: 'image/png' }],
+          icons: [
+            { src: '/icon-96.png', sizes: '96x96', type: 'image/png' },
+            { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+          ],
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,webp,png,jpg,jpeg,woff2}'],

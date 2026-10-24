@@ -29,6 +29,7 @@ import { useApiClaimMutation } from '#/api/auth/use-claim-mutation'
 import { useApiGoogleAuthMutation } from '#/api/auth/use-google-auth-mutation'
 import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
 import { useThanksStore, THANKS_TTL_MS } from '#/lib/thanks-store'
+import { WalletBar } from '#/components/wallet/wallet-bar'
 import { cn } from '#/lib/utils'
 
 export type PlaceViewProps = {
@@ -585,6 +586,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
         </Link>{' '}
         serwisu.
       </p>
+      {!preview && <WalletBar />}
       <ThanksScreen
         visible={showThanksScreen}
         onVisibleChange={handleThanksVisibleChange}

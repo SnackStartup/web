@@ -14,7 +14,7 @@ export const Footer: React.FC<Props> = ({ className }) => {
         <div className="flex flex-col items-center gap-4 text-center lg:flex-row lg:justify-between lg:text-left">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src="/icon-96.png" className="size-5" alt="logo" />
+            <img src="/logo.svg" className="size-5" alt="logo" />
             <span className="text-sm font-bold">Stolik</span>
           </div>
 
