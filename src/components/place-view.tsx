@@ -390,7 +390,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
             >
               <h1 className="font-bold text-xl">Stolik</h1>
               <img
-                src="/icon-96.png"
+                src="/logo.svg"
                 decoding="async"
                 className="size-10"
                 style={
