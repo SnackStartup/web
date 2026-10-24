@@ -6,22 +6,12 @@
       "destination": "/manifest.webmanifest"
     },
     { "source": "/workbox-([^/]+)\\.js", "destination": "/workbox-$1.js" },
-    { "source": "/places/(.*)", "destination": "/places/$1" },
     { "source": "/icon-96.png", "destination": "/icon-96.png" },
     { "source": "/(.*)", "destination": "/" }
   ],
   "headers": [
     {
       "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/places/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

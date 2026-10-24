@@ -10,15 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PayedRouteImport } from './routes/payed'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as TosRouteImport } from './routes/tos'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PayIdRouteImport } from './routes/pay.$id'
 import { Route as ScannedIdRouteImport } from './routes/scanned.$id'
+import { Route as AdminPlaceIdRouteImport } from './routes/admin.place.$id'
+import { Route as AdminPreviewIdRouteImport } from './routes/admin_.preview.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PayedRoute = PayedRouteImport.update({
@@ -36,6 +45,11 @@ const TosRoute = TosRouteImport.update({
   path: '/tos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const PayIdRoute = PayIdRouteImport.update({
   id: '/pay/$id',
   path: '/pay/$id',
@@ -46,14 +60,28 @@ const ScannedIdRoute = ScannedIdRouteImport.update({
   path: '/scanned/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPlaceIdRoute = AdminPlaceIdRouteImport.update({
+  id: '/place/$id',
+  path: '/place/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPreviewIdRoute = AdminPreviewIdRouteImport.update({
+  id: '/admin_/preview/$id',
+  path: '/admin/preview/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/payed': typeof PayedRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/tos': typeof TosRoute
   '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/place/$id': typeof AdminPlaceIdRoute
+  '/admin/preview/$id': typeof AdminPreviewIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,39 +90,70 @@ export interface FileRoutesByTo {
   '/tos': typeof TosRoute
   '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/place/$id': typeof AdminPlaceIdRoute
+  '/admin/preview/$id': typeof AdminPreviewIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/payed': typeof PayedRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/tos': typeof TosRoute
   '/pay/$id': typeof PayIdRoute
   '/scanned/$id': typeof ScannedIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/place/$id': typeof AdminPlaceIdRoute
+  '/admin_/preview/$id': typeof AdminPreviewIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/payed' | '/privacy-policy' | '/tos' | '/pay/$id' | '/scanned/$id'
+    | '/'
+    | '/admin'
+    | '/payed'
+    | '/privacy-policy'
+    | '/tos'
+    | '/pay/$id'
+    | '/scanned/$id'
+    | '/admin/'
+    | '/admin/place/$id'
+    | '/admin/preview/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/payed' | '/privacy-policy' | '/tos' | '/pay/$id' | '/scanned/$id'
-  id:
-    | '__root__'
+  to:
     | '/'
     | '/payed'
     | '/privacy-policy'
     | '/tos'
     | '/pay/$id'
     | '/scanned/$id'
+    | '/admin'
+    | '/admin/place/$id'
+    | '/admin/preview/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/payed'
+    | '/privacy-policy'
+    | '/tos'
+    | '/pay/$id'
+    | '/scanned/$id'
+    | '/admin/'
+    | '/admin/place/$id'
+    | '/admin_/preview/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   PayedRoute: typeof PayedRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   TosRoute: typeof TosRoute
   PayIdRoute: typeof PayIdRoute
   ScannedIdRoute: typeof ScannedIdRoute
+  AdminPreviewIdRoute: typeof AdminPreviewIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,6 +163,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/payed': {
@@ -127,6 +193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/pay/$id': {
       id: '/pay/$id'
       path: '/pay/$id'
@@ -141,16 +214,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScannedIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/place/$id': {
+      id: '/admin/place/$id'
+      path: '/place/$id'
+      fullPath: '/admin/place/$id'
+      preLoaderRoute: typeof AdminPlaceIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin_/preview/$id': {
+      id: '/admin_/preview/$id'
+      path: '/admin/preview/$id'
+      fullPath: '/admin/preview/$id'
+      preLoaderRoute: typeof AdminPreviewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminPlaceIdRoute: typeof AdminPlaceIdRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminPlaceIdRoute: AdminPlaceIdRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   PayedRoute: PayedRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   TosRoute: TosRoute,
   PayIdRoute: PayIdRoute,
   ScannedIdRoute: ScannedIdRoute,
+  AdminPreviewIdRoute: AdminPreviewIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

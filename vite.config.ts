@@ -1,5 +1,4 @@
 import { defineConfig, loadEnv } from 'vite'
-import type { Plugin, ViteDevServer } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -9,28 +8,6 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { existsSync, readFileSync } from 'node:fs'
-import { generateGalleryManifest } from './scripts/generate-gallery-manifest.ts'
-
-const debounce = <T>(fn: () => T, ms: number) => {
-  let t: ReturnType<typeof setTimeout> | undefined
-  return () => {
-    clearTimeout(t)
-    t = setTimeout(fn, ms)
-  }
-}
-
-const galleryManifest = (): Plugin => ({
-  name: 'gallery-manifest',
-  buildStart() {
-    generateGalleryManifest()
-  },
-  configureServer(server: ViteDevServer) {
-    const regen = debounce(() => generateGalleryManifest(), 200)
-    server.watcher.on('all', (_event, path) => {
-      if (path?.includes('public/places')) regen()
-    })
-  },
-})
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -47,7 +24,6 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       devtools(),
       tailwindcss(),
-      galleryManifest(),
       tanstackStart({
         spa: {
           enabled: true, // disable SSR
@@ -101,6 +77,10 @@ export default defineConfig(({ command, mode }) => {
                     target: backendUrl,
                     changeOrigin: true,
                     secure: false, // mkcert self-signed (dev only)
+                  },
+                  '/place-assets': {
+                    target: 'http://localhost:9000',
+                    changeOrigin: true,
                   },
                 },
               }

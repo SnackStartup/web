@@ -2,7 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { MenuIcon, XIcon, ArrowRightIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '#/components/ui/button'
-import { cn } from '#/lib/utils'
+import { AdminLink } from '#/components/admin/admin-link'
+import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
 
 const navLinks = [
   { label: 'Jak to działa', href: '#jak-to-dziala' },
@@ -12,45 +13,57 @@ const navLinks = [
 
 export const Header: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const apiIsAdminQuery = useApiIsAdminQuery()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-lg">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src="/icon-96.png" alt="Stolik" className="size-8" />
-          <span className="text-lg font-bold">Stolik</span>
-        </Link>
-
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </a>
-          ))}
-          <Button size="sm" render={<a href="#kontakt" />}>
-            Skontaktuj się
-            <ArrowRightIcon data-icon="inline-end" />
-          </Button>
-        </nav>
-
-        {/* Mobile menu button */}
-        <button
-          className="flex size-9 items-center justify-center rounded-md transition-colors hover:bg-muted md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? 'Zamknij menu' : 'Otwórz menu'}
-        >
-          {mobileOpen ? (
-            <XIcon className="size-5" />
-          ) : (
-            <MenuIcon className="size-5" />
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-6">
+        {/* Logo, with the admin shortcut sitting to its right */}
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/icon-96.png" alt="Stolik" className="size-8" />
+            <span className="text-lg font-bold">Stolik</span>
+          </Link>
+          {apiIsAdminQuery.isSuccess && (
+            <AdminLink render={<Link to="/admin" />} />
           )}
-        </button>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            ))}
+            <Button
+              size="sm"
+              nativeButton={false}
+              render={<a href="#kontakt" />}
+            >
+              Skontaktuj się
+              <ArrowRightIcon data-icon="inline-end" />
+            </Button>
+          </nav>
+
+          {/* Mobile menu button */}
+          <button
+            className="flex size-9 items-center justify-center rounded-md transition-colors hover:bg-muted md:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Zamknij menu' : 'Otwórz menu'}
+          >
+            {mobileOpen ? (
+              <XIcon className="size-5" />
+            ) : (
+              <MenuIcon className="size-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile nav */}
@@ -69,6 +82,7 @@ export const Header: React.FC = () => {
             ))}
             <Button
               className="mt-2"
+              nativeButton={false}
               render={
                 <a href="#kontakt" onClick={() => setMobileOpen(false)} />
               }
