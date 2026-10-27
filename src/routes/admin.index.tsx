@@ -46,10 +46,25 @@ function AdminPlacesPage() {
               params={{ id: place.id }}
               className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-muted/50"
             >
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate font-medium">{place.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {place.id} · {place.location}
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="size-10 shrink-0 overflow-hidden rounded-md border">
+                  {place.logo_url ? (
+                    <img
+                      src={place.logo_url}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <span className="grid size-full place-items-center bg-muted text-sm text-muted-foreground">
+                      {place.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate font-medium">{place.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {place.id} · {place.location}
+                  </span>
                 </span>
               </span>
               <span className="flex shrink-0 items-center gap-3 text-xs">

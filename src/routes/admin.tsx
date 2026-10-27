@@ -10,8 +10,9 @@ import { isAxiosError } from 'axios'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useApiAdminMeQuery } from '#/api/admin/use-me-query'
 import { useApiGoogleAuthMutation } from '#/api/auth/use-google-auth-mutation'
-import { useApiLogoutMutation } from '#/api/auth/use-logout-mutation'
 import { adminKeys } from '#/api/query-keys'
+import { AdminSignOutButton } from '#/components/admin/admin-sign-out-button'
+import { AdminUnsavedChangesGuard } from '#/components/admin/admin-unsaved-changes-guard'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Spinner } from '#/components/ui/spinner'
@@ -25,7 +26,6 @@ function AdminLayout() {
   const queryClient = useQueryClient()
   const apiAdminMeQuery = useApiAdminMeQuery()
   const apiGoogleAuthMutation = useApiGoogleAuthMutation()
-  const apiLogoutMutation = useApiLogoutMutation()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
@@ -124,18 +124,12 @@ function AdminLayout() {
             <span className="truncate text-xs text-muted-foreground">
               {apiAdminMeQuery.data.email}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={apiLogoutMutation.isPending}
-              onClick={() => apiLogoutMutation.mutate()}
-            >
-              {apiLogoutMutation.isPending ? 'Signing out…' : 'Sign out'}
-            </Button>
+            <AdminSignOutButton />
           </div>
         </div>
       </header>
       <Outlet />
+      <AdminUnsavedChangesGuard />
     </main>
   )
 }

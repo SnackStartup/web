@@ -85,6 +85,26 @@ export const AdminPlaceForm: React.FC<AdminPlaceFormProps> = ({
             onChange={(event) => onChange('facebook_url', event.target.value)}
           />
         </Field>
+        <Field>
+          <FieldLabel htmlFor="place-wifi-ssid">WiFi SSID</FieldLabel>
+          <Input
+            id="place-wifi-ssid"
+            value={value.wifi_ssid}
+            onChange={(event) => onChange('wifi_ssid', event.target.value)}
+          />
+          <FieldDescription>
+            Shown to every guest on the place page.
+          </FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="place-wifi-password">WiFi password</FieldLabel>
+          <Input
+            id="place-wifi-password"
+            value={value.wifi_password}
+            onChange={(event) => onChange('wifi_password', event.target.value)}
+          />
+          <FieldDescription>Leave empty for an open network.</FieldDescription>
+        </Field>
       </div>
 
       <Field>

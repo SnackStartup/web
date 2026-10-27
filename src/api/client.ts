@@ -2,11 +2,10 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import {
-  clearTokens,
   getAccessToken,
   getRefreshToken,
-  setTokens,
-} from '#/lib/auth-token'
+  useAuthTokenStore,
+} from '#/stores/auth-token'
 
 const API_URL = import.meta.env.VITE_API_URL // direct backend (prod/localhost dev)
 const API_LAN_URL = import.meta.env.VITE_API_LAN_URL // LAN-reachable backend (phones)
@@ -53,6 +52,7 @@ let refreshing: Promise<string | null> | null = null
 const refreshSession = async (): Promise<string | null> => {
   const refreshToken = getRefreshToken()
   if (!refreshToken) return null
+  const { setTokens, clearTokens } = useAuthTokenStore.getState()
   try {
     const { data } = await axios.post(
       `${apiClient.defaults.baseURL}/auth/refresh`,

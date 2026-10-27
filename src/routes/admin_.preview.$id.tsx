@@ -5,7 +5,7 @@ import { Page } from '#/components/page'
 import { PlaceView } from '#/components/place-view'
 import { Spinner } from '#/components/ui/spinner'
 import { adminPlaceToApiPlace } from '#/lib/admin'
-import { getAccessToken } from '#/lib/auth-token'
+import { getAccessToken } from '#/stores/auth-token'
 
 // The `admin_` prefix keeps this route under /admin without nesting it in the
 // admin layout, so the guest page still renders full screen.

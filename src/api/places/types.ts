@@ -22,6 +22,8 @@ export const zApiPlace = z.object({
   color_scheme: z.enum(['dark', 'light']).optional(),
   neon: z.boolean().optional(),
   coffee_budget: z.number().optional(),
+  wifi_ssid: z.string().optional(),
+  wifi_password: z.string().optional(),
   logo_url: z.string(),
   background_url: z.string(),
   gallery: z.array(zApiPlaceImage),

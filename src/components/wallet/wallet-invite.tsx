@@ -1,6 +1,6 @@
 import { WalletIcon } from 'lucide-react'
 import { useApiWalletQuery } from '#/api/wallet/use-api-wallet-query'
-import { getAccessToken } from '#/lib/auth-token'
+import { getAccessToken } from '#/stores/auth-token'
 import { cn } from '#/lib/utils'
 
 const getPointsLabel = (n: number) => {

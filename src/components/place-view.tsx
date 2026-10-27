@@ -7,6 +7,7 @@ import {
   FaImage,
   FaFacebook,
   FaInstagram,
+  FaWifi,
 } from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
 import { Rating, RatingItem } from '#/components/ui/rating'
@@ -28,8 +29,9 @@ import type { ApiPlace } from '#/api/places/types'
 import { useApiClaimMutation } from '#/api/auth/use-claim-mutation'
 import { useApiGoogleAuthMutation } from '#/api/auth/use-google-auth-mutation'
 import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
-import { useThanksStore, THANKS_TTL_MS } from '#/lib/thanks-store'
+import { useThanksStore, THANKS_TTL_MS } from '#/stores/thanks-store'
 import { WalletBar } from '#/components/wallet/wallet-bar'
+import { WifiDialog } from '#/components/wifi-dialog'
 import { cn } from '#/lib/utils'
 
 export type PlaceViewProps = {
@@ -62,6 +64,9 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
   const apiPlacesQuery = useApiPlacesQuery()
   const apiIsAdminQuery = useApiIsAdminQuery()
   const placeProps = { place_id: placeId, place_name: place.name }
+  const wifiSsid = place.wifi_ssid ?? ''
+  const wifiPassword = place.wifi_password ?? ''
+  const showWifi = wifiSsid !== ''
   const galleryImages: GalleryImage[] = place.gallery.map((image) => ({
     id: image.id,
     tile: image.tile_url,
@@ -73,6 +78,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
   const [uploadId, setUploadId] = useState<string | null>(null)
   const [verifyingCoffee, setVerifyingCoffee] = useState(false)
   const [showCoffeeCounter, setShowCoffeeCounter] = useState(false)
+  const [showWifiDialog, setShowWifiDialog] = useState(false)
   const apiClaimMutation = useApiClaimMutation()
   const apiGoogleAuthMutation = useApiGoogleAuthMutation()
   const clientTapTimesRef = useRef<number[]>([])
@@ -249,6 +255,15 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
 
   const handleRatingClicked = () => {
     capture('rating_clicked', placeProps)
+  }
+
+  const handleWifiButtonClicked = () => {
+    capture('wifi_opened', placeProps)
+    setShowWifiDialog(true)
+  }
+
+  const handleWifiCopyClicked = () => {
+    capture('wifi_password_copied', placeProps)
   }
 
   const handleClientLogoClicked = () => {
@@ -575,6 +590,22 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
           </Button>
         )}
       </div>
+      {showWifi && (
+        <>
+          <Separator
+            className="bg-primary -my-2 opacity-25"
+            style={neonStyles}
+          />
+          <Button
+            variant="ghost"
+            className="h-auto w-full py-2 whitespace-normal"
+            onClick={handleWifiButtonClicked}
+          >
+            <FaWifi className="size-5" />
+            WiFi: {wifiSsid}
+          </Button>
+        </>
+      )}
       <p className="text-xs text-neutral-400">
         Klikając przycisk „Wyślij", akceptujesz{' '}
         <Link to="/privacy-policy" className="underline hover:text-primary">
@@ -587,6 +618,14 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
         serwisu.
       </p>
       {!preview && <WalletBar />}
+      <WifiDialog
+        open={showWifiDialog}
+        ssid={wifiSsid}
+        password={wifiPassword}
+        disabled={preview}
+        onOpenChange={setShowWifiDialog}
+        onCopy={handleWifiCopyClicked}
+      />
       <ThanksScreen
         visible={showThanksScreen}
         onVisibleChange={handleThanksVisibleChange}

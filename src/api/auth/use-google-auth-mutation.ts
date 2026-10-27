@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '../client'
-import { setTokens } from '#/lib/auth-token'
+import { useAuthTokenStore } from '#/stores/auth-token'
 
 export type GoogleUser = {
   id: string
@@ -16,6 +16,7 @@ export type AuthResponse = GoogleUser & {
 }
 
 export const useApiGoogleAuthMutation = () => {
+  const setTokens = useAuthTokenStore((state) => state.setTokens)
   return useMutation({
     mutationFn: async ({ idToken }: { idToken: string }) => {
       const { data } = await apiClient.post<AuthResponse>('/auth/google', {

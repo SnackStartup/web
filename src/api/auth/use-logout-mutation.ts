@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../client'
 import { adminKeys } from '../query-keys'
-import { clearTokens, getRefreshToken } from '#/lib/auth-token'
+import { getRefreshToken, useAuthTokenStore } from '#/stores/auth-token'
 
 export const useApiLogoutMutation = () => {
   const queryClient = useQueryClient()
+  const clearTokens = useAuthTokenStore((state) => state.clearTokens)
   return useMutation({
     mutationFn: async () => {
       const refreshToken = getRefreshToken()

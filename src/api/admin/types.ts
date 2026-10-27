@@ -22,6 +22,8 @@ export const zApiAdminPlace = z.object({
   color_scheme: z.enum(['dark', 'light']).nullable(),
   neon: z.boolean(),
   coffee_budget: z.number(),
+  wifi_ssid: z.string(),
+  wifi_password: z.string(),
   is_published: z.boolean(),
   updated_at: z.string(),
   payment_token: z.string().nullable(),

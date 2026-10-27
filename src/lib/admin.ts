@@ -19,6 +19,8 @@ export const adminPlaceToPlaceInput = (
   color_scheme: place.color_scheme,
   neon: place.neon,
   coffee_budget: place.coffee_budget,
+  wifi_ssid: place.wifi_ssid,
+  wifi_password: place.wifi_password,
   is_published: place.is_published,
 })
 
@@ -35,6 +37,8 @@ export const emptyAdminPlaceInput: ApiAdminPlaceInput = {
   color_scheme: null,
   neon: false,
   coffee_budget: 0,
+  wifi_ssid: '',
+  wifi_password: '',
   is_published: false,
 }
 
@@ -52,6 +56,8 @@ export const adminPlaceToApiPlace = (place: ApiAdminPlace): ApiPlace => ({
   color_scheme: place.color_scheme ?? undefined,
   neon: place.neon,
   coffee_budget: place.coffee_budget,
+  wifi_ssid: place.wifi_ssid,
+  wifi_password: place.wifi_password,
   logo_url: place.logo_url,
   background_url: place.background_url,
   gallery: place.gallery,

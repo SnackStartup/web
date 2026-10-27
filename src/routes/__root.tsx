@@ -11,6 +11,7 @@ import { initAnalytics } from '#/lib/analytics'
 import { ErrorComponent } from '#/components/error-component'
 import { NotFoundComponent } from '#/components/not-found-component'
 import { Header } from '#/components/header'
+import { Toaster, ToastProvider } from '#/components/ui/toast'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 export const Route = createRootRoute({
@@ -51,10 +52,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] min-h-screen flex flex-col">
         <QueryClientProvider client={queryClient}>
-          <GoogleOAuthProvider clientId={googleClientId}>
-            <div className="flex-1 flex flex-col">{children}</div>
-          </GoogleOAuthProvider>
-          <Footer className="mt-16 pb-14" />
+          <ToastProvider>
+            <GoogleOAuthProvider clientId={googleClientId}>
+              <div className="flex-1 flex flex-col">{children}</div>
+            </GoogleOAuthProvider>
+            <Footer className="mt-16 pb-14" />
+            <Toaster />
+          </ToastProvider>
           {import.meta.env.PROD && <Analytics />}
           {import.meta.env.DEV && (
             <TanStackDevtools

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Eye, Globe } from 'lucide-react'
 import { useApiAdminPlaceExportFetchQuery } from '#/api/admin/use-place-export-fetch-query'
@@ -17,6 +17,7 @@ import { Button } from '#/components/ui/button'
 import { Separator } from '#/components/ui/separator'
 import { adminPlaceToPlaceInput, emptyAdminPlaceInput } from '#/lib/admin'
 import { downloadJsonFile } from '#/lib/download'
+import { useUnsavedChangesStore } from '#/stores/unsaved-changes-store'
 
 export type AdminPlaceEditorProps = {
   isNew: boolean
@@ -34,35 +35,59 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
   const apiAdminPlaceExportFetchQuery = useApiAdminPlaceExportFetchQuery(
     place?.id ?? '',
   )
-  const [form, setForm] = useState<ApiAdminPlaceInput>(() =>
-    place ? adminPlaceToPlaceInput(place) : { ...emptyAdminPlaceInput },
-  )
+  const initialDraft = () =>
+    place ? adminPlaceToPlaceInput(place) : { ...emptyAdminPlaceInput }
+  const [form, setForm] = useState<ApiAdminPlaceInput>(initialDraft)
+  // The form as it was loaded or last saved. isDirty compares it with the live
+  // values, and the leave guard reads that.
+  const [baseline, setBaseline] = useState<ApiAdminPlaceInput>(initialDraft)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isDeleteOpen, setDeleteOpen] = useState(false)
+
+  const isDirty = (
+    Object.keys(baseline) as Array<keyof ApiAdminPlaceInput>
+  ).some((key) => form[key] !== baseline[key])
 
   const setField = <TKey extends keyof ApiAdminPlaceInput>(
     key: TKey,
     value: ApiAdminPlaceInput[TKey],
   ) => setForm((previous) => ({ ...previous, [key]: value }))
 
-  const save = () => {
-    apiAdminPlaceSaveMutation.mutate(
-      { place: { ...form, id: form.id.trim().toLowerCase() }, isNew },
-      {
-        onSuccess: async (saved) => {
-          if (isNew) {
-            await navigate({
-              to: '/admin/place/$id',
-              params: { id: saved.id },
-              replace: true,
-            })
-            return
-          }
-          setForm(adminPlaceToPlaceInput(saved))
-        },
-      },
-    )
+  // Rejects when the save fails, so the leave guard can stay on the page.
+  const save = async () => {
+    const saved = await apiAdminPlaceSaveMutation.mutateAsync({
+      place: { ...form, id: form.id.trim().toLowerCase() },
+      isNew,
+    })
+    if (isNew) {
+      // The save just succeeded, so there is nothing left to warn about.
+      await navigate({
+        to: '/admin/place/$id',
+        params: { id: saved.id },
+        replace: true,
+        ignoreBlocker: true,
+      })
+      return
+    }
+    const next = adminPlaceToPlaceInput(saved)
+    setForm(next)
+    setBaseline(next)
   }
+
+  // The guard calls save() through a ref, so it always calls the current
+  // closure without the draft being re-registered on every keystroke.
+  const saveRef = useRef(save)
+  useEffect(() => {
+    saveRef.current = save
+  })
+
+  useEffect(() => {
+    useUnsavedChangesStore
+      .getState()
+      .setDraft({ isDirty, save: () => saveRef.current() })
+  }, [isDirty])
+
+  useEffect(() => () => useUnsavedChangesStore.getState().clearDraft(), [])
 
   // Export is an on-demand read, so the query stays disabled until the button
   // asks for it and refetch() drives the pending state.
@@ -76,9 +101,11 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
     ? 'Saving…'
     : apiAdminPlaceSaveMutation.isError
       ? 'Could not save.'
-      : apiAdminPlaceSaveMutation.isSuccess
-        ? 'Saved'
-        : null
+      : isDirty
+        ? 'Unsaved changes'
+        : apiAdminPlaceSaveMutation.isSuccess
+          ? 'Saved'
+          : null
 
   return (
     <section className="flex flex-col gap-6">
@@ -112,7 +139,10 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
       <AdminPlaceForm value={form} isNew={isNew} onChange={setField} />
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={apiAdminPlaceSaveMutation.isPending} onClick={save}>
+        <Button
+          disabled={!isDirty || apiAdminPlaceSaveMutation.isPending}
+          onClick={() => void save().catch(() => undefined)}
+        >
           {apiAdminPlaceSaveMutation.isPending ? 'Saving…' : 'Save'}
         </Button>
         {!isNew && place && (
@@ -191,7 +221,8 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
         onConfirm={() => {
           if (!place) return
           apiAdminPlaceDeleteMutation.mutate(place.id, {
-            onSuccess: () => void navigate({ to: '/admin' }),
+            onSuccess: () =>
+              void navigate({ to: '/admin', ignoreBlocker: true }),
           })
         }}
         onOpenChange={setDeleteOpen}

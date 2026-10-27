@@ -82,6 +82,26 @@ invalidate-place-queries.ts         apiAdminInvalidatePlaceQueries
   A mutation that changes a place calls `apiAdminInvalidatePlaceQueries`.
 - Admin text is English. Guest-facing copy in `place-view.tsx` stays Polish.
 
+## Stores
+
+- Every zustand store lives in `src/stores/`, one per file. Nothing that holds
+  app state belongs in `src/lib/`, which is for pure helpers and one-shot
+  utilities.
+- A store owns both its state and the actions that change it
+  (`setTokens`, `clearTokens`, `saveUpload`). A module outside `src/stores/`
+  must not write that state by hand.
+- Non-React callers (the axios client, the router guards) read through
+  `useAuthTokenStore.getState()` or a small exported reader such as
+  `getAccessToken`, never through a subscription.
+- State that has to survive a reload uses the `persist` middleware with
+  `createJSONStorage(() => localStorage)`, one storage key per store
+  (`auth-state`, `thanks-state`), never hand-rolled `localStorage` calls. The
+  rest stays in memory (`unsaved-changes-store`).
+- `persist` hydrates synchronously for `localStorage`, so a store is already
+  filled in when its module finishes loading. A reader such as `getAccessToken`
+  works on the first line of any module, and an absent `localStorage` degrades
+  the store to a plain in-memory one instead of throwing.
+
 ## Components
 
 - Route files stay thin: read params, run one query, render one component.

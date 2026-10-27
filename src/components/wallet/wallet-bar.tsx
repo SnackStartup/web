@@ -1,5 +1,5 @@
 import { useApiWalletQuery } from '#/api/wallet/use-api-wallet-query'
-import { getAccessToken } from '#/lib/auth-token'
+import { getAccessToken } from '#/stores/auth-token'
 import { cn } from '#/lib/utils'
 import { CoffeeIcon, WalletIcon } from 'lucide-react'
 

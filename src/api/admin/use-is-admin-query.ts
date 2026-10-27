@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../client'
-import { getAccessToken } from '#/lib/auth-token'
+import { getAccessToken } from '#/stores/auth-token'
 import { adminKeys } from '../query-keys'
 import type { ApiAdminMe } from './types'
 
