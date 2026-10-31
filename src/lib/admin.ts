@@ -21,6 +21,7 @@ export const adminPlaceToPlaceInput = (
   coffee_budget: place.coffee_budget,
   wifi_ssid: place.wifi_ssid,
   wifi_password: place.wifi_password,
+  google_place_id: place.google_place_id,
   is_published: place.is_published,
 })
 
@@ -39,6 +40,7 @@ export const emptyAdminPlaceInput: ApiAdminPlaceInput = {
   coffee_budget: 0,
   wifi_ssid: '',
   wifi_password: '',
+  google_place_id: null,
   is_published: false,
 }
 
@@ -58,6 +60,7 @@ export const adminPlaceToApiPlace = (place: ApiAdminPlace): ApiPlace => ({
   coffee_budget: place.coffee_budget,
   wifi_ssid: place.wifi_ssid,
   wifi_password: place.wifi_password,
+  google_place_id: place.google_place_id,
   logo_url: place.logo_url,
   background_url: place.background_url,
   gallery: place.gallery,

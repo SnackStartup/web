@@ -20,7 +20,8 @@ export const WalletBar: React.FC = () => {
       target="_blank"
       rel="noopener"
       className={cn(
-        'fixed bottom-4 left-1/2 z-40 flex flex-row -translate-x-1/2 w-2/3 items-center gap-2',
+        // w-2/3 reads as a phone width; on desktop it stops at max-w-md (448px).
+        'fixed bottom-4 left-1/2 z-40 flex flex-row -translate-x-1/2 w-2/3 max-w-md items-center gap-2',
         'rounded-full px-5 py-3 shadow-2xl transition active:scale-95',
         // odwrotność motywu: jasny lokal -> ciemny pasek
         'bg-neutral-900 text-white ring-1 ring-white/10',

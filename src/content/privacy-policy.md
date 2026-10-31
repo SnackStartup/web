@@ -76,6 +76,12 @@ Odbiorcami danych są:
 
 Nie sprzedajemy danych osobowych i nie przekazujemy ich podmiotom trzecim w celach marketingowych.
 
+### Treści Google Maps
+
+Niektóre strony lokali pokazują **ocenę i opinie z Google Maps**. Pobieramy je po stronie naszego serwera, na podstawie publicznego identyfikatora lokalu w Google, i przechowujemy w pamięci podręcznej nie dłużej niż 30 dni. Przy tym pobraniu **nie przekazujemy do Google żadnych danych o Tobie**: zapytanie wychodzi z naszego serwera i zawiera wyłącznie identyfikator lokalu, bez Twojego adresu IP.
+
+Sytuacja zmienia się, gdy otworzysz okno z opiniami: zdjęcia profilowe autorów opinii wczytują się bezpośrednio z serwerów Google, a kliknięcie odnośnika do Google Maps (na przykład „Oceń nas w Google") przenosi Cię do usług Google. W obu przypadkach Google widzi Twój adres IP i staje się administratorem Twoich danych. Obowiązuje wtedy [polityka prywatności Google](https://policies.google.com/privacy).
+
 ---
 
 ## 6. Przekazywanie danych poza EOG

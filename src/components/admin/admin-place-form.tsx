@@ -1,4 +1,5 @@
 import type { ApiAdminPlaceInput } from '#/api/admin/types'
+import { AdminGooglePlaceField } from '#/components/admin/admin-google-place-field'
 import { Checkbox } from '#/components/ui/checkbox'
 import { Field, FieldDescription, FieldLabel } from '#/components/ui/field'
 import { Input } from '#/components/ui/input'
@@ -16,6 +17,9 @@ type ColorSchemeChoice = 'auto' | 'light' | 'dark'
 
 export type AdminPlaceFormProps = {
   value: ApiAdminPlaceInput
+  // The stored Google id, so the venue field can tell a saved link from one just
+  // picked.
+  savedGooglePlaceId: string | null
   isNew: boolean
   onChange: <TKey extends keyof ApiAdminPlaceInput>(
     key: TKey,
@@ -25,6 +29,7 @@ export type AdminPlaceFormProps = {
 
 export const AdminPlaceForm: React.FC<AdminPlaceFormProps> = ({
   value,
+  savedGooglePlaceId,
   isNew,
   onChange,
 }) => {
@@ -106,6 +111,14 @@ export const AdminPlaceForm: React.FC<AdminPlaceFormProps> = ({
           <FieldDescription>Leave empty for an open network.</FieldDescription>
         </Field>
       </div>
+
+      <AdminGooglePlaceField
+        value={value.google_place_id ?? null}
+        placeId={value.id}
+        savedGooglePlaceId={savedGooglePlaceId}
+        isNew={isNew}
+        onChange={(next) => onChange('google_place_id', next)}
+      />
 
       <Field>
         <FieldLabel htmlFor="place-description">Description</FieldLabel>

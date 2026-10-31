@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useApiAdminPlaceQuery } from '#/api/admin/use-place-query'
+import { useApiAdminGoogleReviewsQuery } from '#/api/admin/use-google-reviews-query'
 import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
 import { Page } from '#/components/page'
 import { PlaceView } from '#/components/place-view'
@@ -18,6 +19,9 @@ function RouteComponent() {
   const hasToken = Boolean(getAccessToken())
   const apiIsAdminQuery = useApiIsAdminQuery()
   const apiAdminPlaceQuery = useApiAdminPlaceQuery(hasToken ? id : '')
+  const apiAdminGoogleReviewsQuery = useApiAdminGoogleReviewsQuery(
+    hasToken ? id : '',
+  )
 
   if (!hasToken || apiIsAdminQuery.isError) {
     return (
@@ -56,6 +60,7 @@ function RouteComponent() {
       place={adminPlaceToApiPlace(apiAdminPlaceQuery.data)}
       placeId={id}
       preview
+      googleReviews={apiAdminGoogleReviewsQuery.data}
     />
   )
 }

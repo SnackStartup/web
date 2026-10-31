@@ -136,7 +136,12 @@ export const AdminPlaceEditor: React.FC<AdminPlaceEditorProps> = ({
         </div>
       )}
 
-      <AdminPlaceForm value={form} isNew={isNew} onChange={setField} />
+      <AdminPlaceForm
+        value={form}
+        savedGooglePlaceId={baseline.google_place_id ?? null}
+        isNew={isNew}
+        onChange={setField}
+      />
 
       <div className="flex flex-wrap items-center gap-3">
         <Button

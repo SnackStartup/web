@@ -20,6 +20,8 @@
 2. Korzystanie z Serwisu **nie wymaga zakładania konta** ani podawania danych kontaktowych.
 3. Do korzystania z Serwisu potrzebne jest urządzenie z aparatem, przeglądarką internetową obsługującą HTML5 oraz dostępem do internetu.
 4. Serwis jest przeznaczony wyłącznie dla osób, które **ukończyły 16 lat**.
+5. Jeżeli lokal jest powiązany ze swoją wizytówką Google, Serwis pokazuje jego **ocenę i opinie pochodzące z Google Maps**. Treści te należą do Google i są wyświetlane zgodnie z [Warunkami korzystania z Google Maps Platform](https://cloud.google.com/maps-platform/terms). Nie mamy wpływu na ich treść ani na to, które opinie Google prezentuje.
+6. Odnośnik „Oceń nas w Google" prowadzi do formularza opinii Google. Dodanie opinii odbywa się w usłudze Google, na warunkach Google, i nie jest konieczne do korzystania z Serwisu.
 
 ---
 

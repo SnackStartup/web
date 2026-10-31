@@ -24,6 +24,7 @@ export const zApiAdminPlace = z.object({
   coffee_budget: z.number(),
   wifi_ssid: z.string(),
   wifi_password: z.string(),
+  google_place_id: z.string().nullable(),
   is_published: z.boolean(),
   updated_at: z.string(),
   payment_token: z.string().nullable(),
@@ -54,6 +55,18 @@ export const zApiAdminMe = z.object({
 })
 
 export type ApiAdminMe = z.infer<typeof zApiAdminMe>
+
+export const zApiGooglePlaceSearchResult = z.object({
+  place_id: z.string(),
+  name: z.string(),
+  address: z.string(),
+  rating: z.number().nullable(),
+  rating_count: z.number().nullable(),
+})
+
+export type ApiGooglePlaceSearchResult = z.infer<
+  typeof zApiGooglePlaceSearchResult
+>
 
 export const zApiPlaceExport = z.object({
   version: z.number(),

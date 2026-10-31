@@ -10,8 +10,7 @@ import {
   FaWifi,
 } from 'react-icons/fa6'
 import { FileUploadGallery } from '#/components/file-upload-gallery'
-import { Rating, RatingItem } from '#/components/ui/rating'
-import { Share2Icon, StarIcon } from 'lucide-react'
+import { Share2Icon } from 'lucide-react'
 import { useApiPhotosUploadMutation } from '#/api/photos/use-upload-mutation'
 import type { FreeCoffeeReason } from '#/api/photos/use-upload-mutation'
 import { ThanksScreen } from '#/components/thanks-screen'
@@ -25,7 +24,9 @@ import { analyticsCapture } from '#/lib/analytics'
 import { HighlightedText } from '#/components/highlighted-text'
 import { Page } from '#/components/page'
 import { useApiPlacesQuery } from '#/api/places/use-places-query'
-import type { ApiPlace } from '#/api/places/types'
+import { useApiPlaceGoogleReviewsQuery } from '#/api/places/use-place-google-reviews-query'
+import { PlaceGoogleReviews } from '#/components/place-google-reviews'
+import type { ApiGoogleReviews, ApiPlace } from '#/api/places/types'
 import { useApiClaimMutation } from '#/api/auth/use-claim-mutation'
 import { useApiGoogleAuthMutation } from '#/api/auth/use-google-auth-mutation'
 import { useApiIsAdminQuery } from '#/api/admin/use-is-admin-query'
@@ -40,6 +41,9 @@ export type PlaceViewProps = {
   // Admin preview of an unpublished place: same page, controls inert.
   preview?: boolean
   onPlaceRefetch?: () => void
+  // The preview reads reviews through the admin route; the public one hides
+  // unpublished places.
+  googleReviews?: ApiGoogleReviews
 }
 
 export const PlaceView: React.FC<PlaceViewProps> = ({
@@ -47,6 +51,7 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
   placeId,
   preview = false,
   onPlaceRefetch,
+  googleReviews,
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const inputFileRef = useRef<HTMLInputElement>(null)
@@ -62,6 +67,9 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
   )
   const isUploadingDisabled = selectedFiles.length === 0 || isUploading
   const apiPlacesQuery = useApiPlacesQuery()
+  const apiPlaceGoogleReviewsQuery = useApiPlaceGoogleReviewsQuery(
+    preview ? '' : placeId,
+  )
   const apiIsAdminQuery = useApiIsAdminQuery()
   const placeProps = { place_id: placeId, place_name: place.name }
   const wifiSsid = place.wifi_ssid ?? ''
@@ -253,10 +261,6 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
     }
   }
 
-  const handleRatingClicked = () => {
-    capture('rating_clicked', placeProps)
-  }
-
   const handleWifiButtonClicked = () => {
     capture('wifi_opened', placeProps)
     setShowWifiDialog(true)
@@ -428,19 +432,20 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
           <FaLocationDot className="size-5" />
           <p>{place.location}</p>
         </div>
-        <div className="flex flex-row items-center justify-between">
-          <Rating
-            defaultValue={5}
-            className="gap-1 text-[#f8cc2f]"
-            onClick={handleRatingClicked}
-          >
-            {Array.from({ length: 5 }, (_, i) => (
-              <RatingItem key={i} className="pointer-events-none">
-                <StarIcon />
-              </RatingItem>
-            ))}
-          </Rating>
-          <div className="flex flex-row gap-4 items-center">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <PlaceGoogleReviews
+            googlePlaceId={place.google_place_id}
+            placeName={place.name}
+            reviews={googleReviews ?? apiPlaceGoogleReviewsQuery.data}
+            preview={preview}
+            onCapture={capture}
+          />
+          {/*
+            ml-auto is the guard when the row wraps on a very narrow screen:
+            justify-between starts a lone item on the left, while an auto margin
+            keeps the icons on the right edge.
+          */}
+          <div className="ml-auto flex shrink-0 flex-row items-center gap-4">
             {preview ? (
               <Button size="sm" className="p-0" variant="ghost" disabled>
                 <FaInstagram className="size-5" />
@@ -637,6 +642,14 @@ export const PlaceView: React.FC<PlaceViewProps> = ({
         coffeeInfo={coffeeInfo}
         verifyingCoffee={verifyingCoffee}
         onGoogleSuccess={handleGoogleSuccess}
+        googlePlaceId={place.google_place_id}
+        preview={preview}
+        onGoogleReviewClick={() =>
+          capture('google_review_cta_clicked', {
+            ...placeProps,
+            source: 'thanks',
+          })
+        }
       />
     </Page>
   )

@@ -1,10 +1,19 @@
 import { useEffect } from 'react'
-import { FaHeart, FaMugHot, FaInstagram, FaXmark, FaEye } from 'react-icons/fa6'
+import {
+  FaHeart,
+  FaMugHot,
+  FaInstagram,
+  FaXmark,
+  FaEye,
+  FaStar,
+} from 'react-icons/fa6'
 
 import './thanks-screen.css'
 import { cn } from '#/lib/utils'
+import { googleReviewFormUrl } from '#/lib/google-reviews'
 import type { FreeCoffeeReason } from '#/api/photos/use-upload-mutation'
 import { GoogleLogin } from '@react-oauth/google'
+import { Button } from './ui/button'
 import { Spinner } from './ui/spinner'
 import { WalletInvite } from './wallet/wallet-invite'
 
@@ -15,6 +24,14 @@ const COFFEE_REASON_MESSAGES: Record<FreeCoffeeReason, string> = {
   budget_exhausted:
     'Dziś kawy w naszym lokalu już się rozeszły, ale Twoje zdjęcie jest bezcenne, zajrzyj do nas kiedy indziej!',
 }
+
+// 296x40 pill, the size GSI paints the Google sign-in button at (width={296}
+// below pins it). That iframe cannot be restyled, so the review button copies its
+// white fill, #dadce0 hairline and 14px medium text, and starts content 12px in
+// like the Google mark. Labels stay short: nowrap would run a longer one past the
+// pill, and p-8 leaves 296px on a 360px phone.
+const ACTION_CLASSES =
+  'flex h-10 w-full max-w-[296px] items-center justify-start gap-2.5 rounded-full pl-3 pr-4 text-sm font-medium whitespace-nowrap active:scale-95 transition-transform'
 
 type CoffeeInfo = {
   reason: FreeCoffeeReason
@@ -31,6 +48,12 @@ type Props = {
   coffeeInfo?: CoffeeInfo
   verifyingCoffee?: boolean
   onGoogleSuccess?: (idToken: string) => void
+  // The venue's Google id, when the place is linked.
+  googlePlaceId?: string | null
+  // Draft preview: the offer renders but stays inert, since it posts to a real
+  // Google listing.
+  preview?: boolean
+  onGoogleReviewClick?: () => void
 }
 
 export const ThanksScreen: React.FC<Props> = ({
@@ -44,6 +67,9 @@ export const ThanksScreen: React.FC<Props> = ({
   coffeeInfo,
   verifyingCoffee,
   onGoogleSuccess,
+  googlePlaceId,
+  preview = false,
+  onGoogleReviewClick,
 }) => {
   const hasCoffee = coffeeInfo?.reason === 'granted'
   const hasCoffeeNotice = coffeeInfo != null && !hasCoffee
@@ -51,7 +77,6 @@ export const ThanksScreen: React.FC<Props> = ({
     ? COFFEE_REASON_MESSAGES[coffeeInfo.reason]
     : undefined
 
-  // scroll to top & lock body scroll
   useEffect(() => {
     if (!visible) return
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -113,11 +138,23 @@ export const ThanksScreen: React.FC<Props> = ({
         <h2 className="text-neutral-400 text-center">
           {coffeeMessage ?? 'Zgłoszenie zostało przyjęte'}
         </h2>
+        {/* More air above the block than inside: the copy leads it. */}
         {visible && (!coffeeInfo || verifyingCoffee) && (
-          <div className="mt-6 flex w-full max-w-sm flex-col gap-3 items-center">
+          <div className="mt-10 flex w-full max-w-[296px] flex-col items-center gap-3">
+            {/*
+              Theme colour, not fixed grey: the venue's background is light or
+              dark. text-balance keeps two even lines; otherwise "pierwsze
+              zdjęcie" sits alone on the second.
+            */}
+            <p className="text-center text-sm text-foreground/80 text-balance">
+              Zaloguj się, aby odebrać darmową kawę za pierwsze zdjęcie
+            </p>
+            {/* Left alone GSI sizes this to its label, so the column drifts. */}
             <GoogleLogin
               theme="outline"
               shape="pill"
+              size="large"
+              width={296}
               text="continue_with"
               ux_mode="popup"
               onSuccess={(cred) => onGoogleSuccess?.(cred.credential ?? '')}
@@ -125,9 +162,6 @@ export const ThanksScreen: React.FC<Props> = ({
               auto_select={false}
             />
             {verifyingCoffee && <Spinner className="size-6" />}
-            <p className="text-xs text-neutral-400 text-center">
-              Zaloguj się, aby odebrać darmową kawę za pierwsze zdjęcie
-            </p>
           </div>
         )}
         {hasCoffee && (
@@ -162,21 +196,67 @@ export const ThanksScreen: React.FC<Props> = ({
             </span>
           </div>
         )}
+        {/*
+          Every state, never gated on the coffee outcome or the guest's mood:
+          Google forbids review gating. A star, not the G (a second sign-in
+          button), in Google's #FBBC05.
+        */}
+        {googlePlaceId &&
+          (preview ? (
+            <span
+              aria-disabled="true"
+              className={cn(
+                ACTION_CLASSES,
+                'mt-1 border border-[#dadce0] bg-white text-[#3c4043] opacity-60',
+              )}
+            >
+              <FaStar className="size-5 shrink-0 text-[#FBBC05]" />
+              Oceń nas w Google
+            </span>
+          ) : (
+            <a
+              href={googleReviewFormUrl(googlePlaceId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onGoogleReviewClick}
+              className={cn(
+                ACTION_CLASSES,
+                'mt-1 border border-[#dadce0] bg-white text-[#3c4043] hover:bg-[#f8f9fa]',
+              )}
+            >
+              <FaStar className="size-5 shrink-0 text-[#FBBC05]" />
+              Oceń nas w Google
+            </a>
+          ))}
         {showInstagramShare && !hasCoffee && (
-          <div className="mt-4 flex flex-col items-center gap-2">
+          <div className="mt-1 flex w-full flex-col items-center gap-2">
             <button
               type="button"
               onClick={onInstagramShare}
-              className="flex items-center gap-3 rounded-full px-6 py-3 text-white font-semibold text-lg active:scale-95 transition-transform shadow-lg"
+              className={cn(ACTION_CLASSES, 'text-white shadow-lg')}
               style={{
                 background:
                   'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
               }}
             >
-              <FaInstagram className="size-6" />
+              <FaInstagram className="size-5" />
               Wrzuć na Instagrama
             </button>
           </div>
+        )}
+        {/*
+          Same exit as the X. mt-8: a 32px box around a 16px line puts the text
+          48px under the last pill, matching the step above the sign-in copy.
+        */}
+        {visible && (
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => onVisibleChange(false)}
+            className="mt-8 text-foreground/70 underline"
+          >
+            Nie, dziękuję
+          </Button>
         )}
       </div>
     </div>

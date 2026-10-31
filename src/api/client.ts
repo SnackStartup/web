@@ -34,6 +34,9 @@ axiosRetry(apiClient, {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
+    // A 429 is the limiter answering on purpose; retrying only spends the limit
+    // again.
+    if (error.response?.status === 429) return false
     return (
       axiosRetry.isNetworkOrIdempotentRequestError(error) ||
       error.code === 'ECONNABORTED'
